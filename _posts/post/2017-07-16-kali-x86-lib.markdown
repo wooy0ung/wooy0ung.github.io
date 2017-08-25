@@ -1,0 +1,30 @@
+---
+layout:     post
+title:      kali x64系统安装x86 lib
+author:     wooy0ung
+tags: 		kali x64
+category:  	post
+---
+
+
+### 0x00 运行32位程序
+
+![](/assets/img/post/2017-07-16-kali-x86-lib/0x00.png)
+
+出现以上提示，说明kali缺少32位lib
+<!-- more -->
+
+
+### 0x01 安装32位lib
+
+```
+dpkg --add-architecture i386
+apt-get update
+apt-get install lib32z1 lib32ncurses5
+```
+
+![](/assets/img/post/2017-07-16-kali-x86-lib/0x01.png)
+
+安装完成后，再次运行
+
+![](/assets/img/post/2017-07-16-kali-x86-lib/0x02.png)
