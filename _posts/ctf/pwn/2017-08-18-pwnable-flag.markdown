@@ -2,7 +2,7 @@
 layout:     post
 title:      pwnable flag
 author:     wooy0ung
-tags: 		linux elf pwn
+tags: 		pwn
 category:  	ctf
 ---
 
