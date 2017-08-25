@@ -1,13 +1,11 @@
 ---
 layout:     post
-title:      pwnable flag
+title:      [pwnable] flag
 author:     wooy0ung
 tags: 		pwn
 category:  	ctf
 ---
 
-
-### 0x00 introduction
 
 ```
 Problem Address:
