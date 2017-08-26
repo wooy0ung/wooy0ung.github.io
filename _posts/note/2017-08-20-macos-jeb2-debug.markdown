@@ -9,7 +9,7 @@ category:  	note
 
 >JEB2 打开apk反编译, 直接选择 start debug 提示缺少 adb  
 
-![](/assets/img/note/2017-08-20-jeb2-debug/0x00.png)
+![](/assets/img/note/2017-08-20-macos-jeb2-debug/0x00.png)
 <!-- more -->
 
 
@@ -35,5 +35,5 @@ export PATH=${PATH}:~/toolchain/operation_system/Android/Development/sdk/mac-and
 $ ./jeb_macos.sh
 ```
 
-![](/assets/img/note/2017-08-20-jeb2-debug/0x01.png)
-![](/assets/img/note/2017-08-20-jeb2-debug/0x02.png)
+![](/assets/img/note/2017-08-20-macos-jeb2-debug/0x01.png)
+![](/assets/img/note/2017-08-20-macos-jeb2-debug/0x02.png)

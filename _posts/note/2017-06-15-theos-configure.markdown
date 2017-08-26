@@ -7,10 +7,6 @@ category:  	note
 ---
 
 
->theos是一个越狱开发工具包, 类似App Store开发的Xcode, 但依赖于Xcode。
->与其他工具相比, 工程结构简单, 开发便捷, 安装也简单。
-
-
 ### 0x00 指定xcode
 
 ```
