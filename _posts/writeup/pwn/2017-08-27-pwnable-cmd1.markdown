@@ -19,11 +19,11 @@ category:  	writeup
 
 ### 0x00 exploit
 
-查看源码, flag、sh、tmp 被过滤了
+查看源码, 过滤了 flag、sh、tmp 字符
 
 ![](/assets/img/writeup/pwn/2017-08-27-pwnable-cmd1/0x00.png)
 
-利用通配符绕过, getflag~
+利用通配符*绕过, getflag~
 
 ```
 $ ./cmd1 "/bin/cat f*"

