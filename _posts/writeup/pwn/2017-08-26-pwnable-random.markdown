@@ -31,7 +31,7 @@ if key ^ random = 0xdeadbeef, getflag~
 通过debug拿到random值
 
 ```
-$ x \20i $pc
+$ x /20i $pc
 $ i r
 ```
 
