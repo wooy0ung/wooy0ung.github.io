@@ -12,7 +12,7 @@ category:  	writeup
 >  
 >Problem Description:  
 >We all make mistakes, let's move on.  
-(don't take this too seriously, no fancy hacking skill is required at all)  
+>(don't take this too seriously, no fancy hacking skill is required at all)  
 >  
 >This task is based on real event  
 >Thanks to dhmonkey  
