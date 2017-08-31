@@ -39,8 +39,6 @@ category:  	writeup
 (lldb) list image -o -f
 ```
 
-0x0000000000050000+0x0000000100009A94
-
 ![](/assets/img/writeup/re/2017-08-31-alicrackme-2015-ios-level1/0x04.png)
 
 在第一个 _objc_msgSend 下断, 输入任意密码(如:11111111)后点击"进入", 断点断下
@@ -54,6 +52,6 @@ category:  	writeup
 
 ![](/assets/img/writeup/re/2017-08-31-alicrackme-2015-ios-level1/0x05.png)
 
-继续单步下去, 最后一个 _objc_msgSend 返回了 flag, 将 X22寄存器打印出来, getflag~
+继续单步下去, 最后一个 _objc_msgSend 返回了 flag, 将 X0 寄存器打印出来, getflag~
 
 ![](/assets/img/writeup/re/2017-08-31-alicrackme-2015-ios-level1/0x06.png)

@@ -57,6 +57,6 @@ $ lldb
 (lldb) process connect connect://localhost:7000
 ```
 
-attach 上去后, 效果如下
+attach 成功后, 效果如下
 
 ![](/assets/img/note/2017-08-31-osx-lldb-app/0x00.png)
