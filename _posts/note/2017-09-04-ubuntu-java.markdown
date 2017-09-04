@@ -9,6 +9,10 @@ category:  	note
 
 >环境:  
 >ubuntu 16.04 LST  
+>java jdk1.8.0_121  
+>注意:  
+>直接 wget, 会出现 Authentication Failed  
+![](/assets/img/note/2017-09-04-ubuntu-java/0x00.png)  
 <!-- more -->
 
 
@@ -22,11 +26,11 @@ $ java -version
 
 未安装
 
-![](/assets/img/note/2017-09-04-ubuntu-java/0x00.png)
+![](/assets/img/note/2017-09-04-ubuntu-java/0x01.png)
 
 下载 jdk, [传送门](http://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase8-2177648.html)
 
-![](/assets/img/note/2017-09-04-ubuntu-java/0x01.png)
+![](/assets/img/note/2017-09-04-ubuntu-java/0x02.png)
 
 选择对应版本的 jdk, 登录后获取下载地址
 
@@ -62,4 +66,4 @@ $ java -version
 
 安装完成
 
-![](/assets/img/note/2017-09-04-ubuntu-java/0x02.png)
+![](/assets/img/note/2017-09-04-ubuntu-java/0x03.png)
