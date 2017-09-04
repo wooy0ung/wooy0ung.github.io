@@ -1,0 +1,58 @@
+---
+layout:     post
+title:      ubuntu 下搭建 shadowsocks 服务器
+author:     wooy0ung
+tags: 		ubuntu
+category:  	note
+---
+
+
+>环境:  
+>ubuntu 16.04 LST  
+<!-- more -->
+
+
+### 0x00 shadowsocks
+
+安装 shadowsocks
+
+```
+$ sudo apt-get update
+$ sudo apt-get install python-pip
+$ sudo pip install shadowsocks
+```
+
+
+### 0x00 configure
+
+创建 /etc/shadowsocks.json, 添加
+
+```
+{
+    "server": "server_ip",
+    "server_port": 8000,
+    "local_port": 1080,
+    "password": "password",
+    "timeout": 300,
+    "method": "aes-256-cfb"
+}
+```
+
+后台启动
+
+```
+$ sudo ssserver -c /etc/shadowsocks.json -d start
+```
+
+添加开机启动项
+
+```
+$ cd /etc/init.d
+$ nano shadowsocks
+#添加
+#!/bin/bash
+ssserver -c /etc/shadowsocks.json -d start
+
+$ chmod 755 shadowsocks
+$ sudo update-rc.d shadowsocks defaults 95
+```
