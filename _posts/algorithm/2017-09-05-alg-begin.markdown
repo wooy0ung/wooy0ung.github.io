@@ -3,7 +3,7 @@ layout:     post
 title:      ALG 开坑~~
 author:     wooy0ung
 tags: 	    msf
-category:   exploit
+category:   algorithm
 ---
 
 
