@@ -2,7 +2,7 @@
 layout:     post
 title:      ALG 开坑~~
 author:     wooy0ung
-tags: 	    msf
+tags: 	    alg
 category:   algorithm
 ---
 
@@ -10,5 +10,5 @@ category:   algorithm
 >以前稍稍接触过 ALG, 没太往深做就弃了, 现在挖个坑, 算是重新开始吧~  
 >记得以前在 Windows 下用 Code::Blocks 比较顺手, 居然 Mac 也有, 但经常代码写一半就崩掉...  
 >再来就发现 CLion, 整合了 cmake、gdb, UI也很棒, 神器啊~  
->![](/assets/img/algorithm/2017-09-03-alg-begin/0x00.png)  
+>![](/assets/img/algorithm/2017-09-05-alg-begin/0x00.png)  
 <!-- more -->
