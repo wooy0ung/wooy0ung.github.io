@@ -8,6 +8,7 @@ category:  	note
 
 
 >环境:  
+>DigitalOcean Singapore  
 >ubuntu 16.04 LST  
 <!-- more -->
 
