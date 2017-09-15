@@ -8,7 +8,8 @@ category:  	note
 
 ### 0x00 配置substitute
 
-下载MacOSX10.11.sdk，放入/Applications/XCode_8.2.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+下载MacOSX10.11.sdk，放入
+/Applications/XCode_8.2.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
 
 ```
 $ sudo svn checkout https://github.com/wooy0ung/ios/trunk/MacOSX-SDKs/MacOSX10.11.sdk
