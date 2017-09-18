@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      jarvisoj DD - Android Easy
+title:      jarvisoj [61dctf]]Android Easy
 author:     wooy0ung
 tags: 		re
 category:  	writeup
