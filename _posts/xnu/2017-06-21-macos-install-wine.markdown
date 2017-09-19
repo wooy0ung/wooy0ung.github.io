@@ -2,21 +2,26 @@
 layout:     post
 title:      在macOS安装wine
 author:     wooy0ung
-tags: 		osx
-category:  	note
+tags: 		macos
+category:  	xnu
 ---
 
 
-### 0x00 安装 wine & winetricks
+>说明:
+>因为没有mac版的IDA, 每次都要先打开虚拟机再开IDA真是难受... (ノ ﾟДﾟ)ノ 
+>网上搜了下, 发现了wine这个神器。
+<!-- more -->
+
+
+### 0x00 安装wine & winetricks
 
 ```
 $ brew install wine
 $ brew install winetricks
 ```
-<!-- more -->
 
 
-### 0x01 配置 wine & winetricks
+### 0x01 配置wine & winetricks
 
 ```
 $ winecfg
@@ -24,7 +29,7 @@ $ winecfg
 
 弹出需要下载缺少的组件，选择是即可，然后选择windows 7版本
 
-![](/assets/img/note/2017-06-21-macos-wine/0x00.png)
+![](/assets/img/xnu/2017-06-21-macos-install-wine/0x00.png)
 
 
 ### 0x02 安装常用组件
@@ -50,6 +55,7 @@ $ winetricks vcrun2013
 $ winetricks vcrun2015
 ```
 
+
 ### 0x03 配置字体 & 显示
 
 ```
@@ -59,12 +65,14 @@ $ winetricks ddr=opengl
 $ winetricks fontsmooth=rgb
 ```
 
+
 ### 0x04 关闭输出调试信息
 
 ```
 // 将 export WINEDEBUG=-all 添加到 .bash_profile
 $ source ./.bash_profile
 ```
+
 
 ### 0x05 常用命令
 

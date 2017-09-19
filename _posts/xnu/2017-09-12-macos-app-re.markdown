@@ -3,14 +3,13 @@ layout:     post
 title:      macOS 逆向挖坑～
 author:     wooy0ung
 tags: 		macos
-category:  	note
+category:  	xnu
 ---
 
 
 >说明:  
 >前几天刷帖时突然发现《macOS软件安全与逆向分析》出版, 立马入手了一本。  
 >大致翻了一下, 居然是以最新的 macOS Sierra 系统讲的, 继续开坑～  
-![](/assets/img/note/2017-09-12-macos-app-re/0x00.jpg)
 <!-- more -->
 
 
@@ -37,7 +36,7 @@ $ brew install brew-cask
 
 安装 Dash, 下载 Apple API Reference
 
-![](/assets/img/note/2017-09-12-macos-app-re/0x01.jpg)
+![](/assets/img/xnu/2017-09-12-macos-app-re/0x00.jpg)
 
 关闭 Rootless, 进入恢复模式
 
@@ -114,11 +113,6 @@ rootless
 
 
 ### 0x04 记录
-
-```
-按照样列 getbaseaddr 编译带 ASLR 的 Mach-O 文件, 经 aslr_disable 处理。
-在 Finder 单击选中后会触发 Finder 崩溃。
-```
 
 ```
 # 在除了 App Store 以外下载的 App 会带上 "@" 标志, 便于 Gatekeeper 进行验证

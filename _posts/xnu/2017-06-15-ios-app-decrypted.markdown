@@ -3,15 +3,16 @@ layout:     post
 title:      WeChat砸壳
 author:     wooy0ung
 tags: 		ios
-category:  	note
+category:  	xnu
 ---
 
 
+>说明:  
 >App Store 下载的应用默认进行一种数字加密, 导致无法 class-dump 以及进一步分析。  
 >dumpdecrypted 会将运行起来已经解密完成的结果dump出来, 得到一个可执行程序。  
+<!-- more -->
 
-
-### 0x00 下载dumpdecrypted
+### 0x00 dumpdecrypted
 
 ```
 $ sudo svn checkout https://github.com/wooy0ung/ios/trunk/dumpdecrypted
@@ -19,20 +20,16 @@ $ cd dumpdecrypted
 $ sudo make
 ```
 
-![](/assets/img/note/2017-06-15-app-decrypt/0x00.png)
-<!-- more -->
+![](/assets/img/xnu/2017-06-15-ios-app-decrypt/0x00.png)
 
 
-### 0x01 连接设备
+### 0x01 注入目标进程
 
 ssh连上iOS，密码默认alpine（可用passwd命令更改）
 
 ```
 $ ssh root@192.168.2.115
 ```
-
-
-### 0x02 找到目标App
 
 关闭所有后台App，后台保留待破解App，用ps命令找到App的bundle
 
@@ -44,9 +41,6 @@ root# ps -e | grep /Application
  1891 ttys000    0:00.00 grep /Application
 ```
 
-
-### 0x03 注入目标进程
-
 用cycript命令，注入目标App找到App的Documents路径
 
 ```
@@ -56,30 +50,30 @@ cy# [[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDoma 
 ```
 
 
-### 0x04 将dumpdecrypted.dylib复制到Documents目录
+### 0x02 砸壳
+
+将dumpdecrypted.dylib复制到Documents目录
 
 ```
 $ scp ~/dumpdecrypted/dumpdecrypted.dylib root@172.20.10.1:/var/mobile/Applications/DD9A6BD4-0DD8-4A4E-9E0C-3B5C017B3436/Documents/
 ```
 
-
-### 0x05 砸壳，完成后会在当前目录下生成WeChat.decrypted
+开始砸壳，完成后会在当前目录下生成WeChat.decrypted
 
 ```
 // DYLD_INSERT_LIBRARIES=/path/to/dumpdecrypted.dylib /path/to/executable
 root# DYLD_INSERT_LIBRARIES=/var/mobile/Applications/DD9A6BD4-0DD8-4A4E-9E0C-3B5C017B3436/Documents/dumpdecrypted.dylib /var/mobile/Applications/DD9A6BD4-0DD8-4A4E-9E0C-3B5C017B3436/WeChat.app/WeChat
 ```
 
-![](/assets/img/note/2017-06-15-app-decrypt/0x01.png)
+![](/assets/img/xnu/2017-06-15-ios-app-decrypt/0x01.png)
 
-
-### 0x06 将WeChat.decrypted.decrypted复制到mac
+将WeChat.decrypted.decrypted复制到mac
 
 ```
 scp root@172.20.10.1:~/WeChat.decrypted ~/
 ```
 
-### 0x07 class-dump
+### 0x03 class-dump
 
 ```
 //到 http://stevenygard.com/projects/class-dump/ 下载class-dump-3.5.dmg，将dmg包里的executable复制到 /usr/local/bin
@@ -89,4 +83,4 @@ $ class-dump -s -S -H ~/WeChat.decrypted -o ~/header
 
 dump出8000+的header，说明砸壳成功
 
-![](/assets/img/note/2017-06-15-app-decrypt/0x02.png)
+![](/assets/img/xnu/2017-06-15-ios-app-decrypt/0x02.png)

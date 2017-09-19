@@ -1,24 +1,29 @@
 ---
 layout:     post
-title:      搭建theos越狱开发环境
+title:      搭建Theos越狱开发环境
 author:     wooy0ung
 tags: 		ios
-category:  	note
+category:  	xnu
 ---
 
 
-### 0x00 指定xcode
+>说明:
+>iOS越狱开发的利器, 由DHowett开发, 提供了快速编写hook的框架。  
+>工程结构简单, 要注意的是配置过程有些坑...  
+<!-- more -->
+
+
+### 0x00 Theos
+
+指定Xcode
 
 ```
 $ sudo xcode-select -s /Applications/Xcode_7.2.app/Contents/Developer
 Password:
-$ xcode-select -p
-/Applications/Xcode_7.2.app/Contents/Developer
+$ xcode-select -p /Applications/Xcode_7.2.app/Contents/Developer
 ```
-<!-- more -->
 
-
-### 0x01 下载theos
+获取Theos(因为版本不稳定, 我上传到了个人Github)
 
 ```
 $ export THEOS=/opt/theos        
@@ -27,14 +32,14 @@ $ sudo svn checkout https://github.com/wooy0ung/ios/trunk/theos $THEOS
 
 第一次使用svn的话, 可能会出现下面这个提示，输入p即可
 
-![](/assets/img/note/2017-06-15-theos-configure/0x00.png)
+![](/assets/img/xnu/2017-06-15-theos-configure/0x00.png)
 
 获取完成
 
-![](/assets/img/note/2017-06-15-theos-configure/0x01.png)
+![](/assets/img/xnu/2017-06-15-theos-configure/0x01.png)
 
 
-### 0x02 赋予execute权限
+### 0x01 ldid & dpkg
 
 ```
 $ sudo chmod 777 /opt/theos/bin/ldid
@@ -42,9 +47,9 @@ $ sudo chmod 777 /opt/theos/bin/dpkg-deb
 ```
 
 
-### 0x03 编写第一个tweak
+### 0x02 编写第一个tweak
 
-启动theos
+启动Theos
 
 ```
 $ /opt/theos/bin/nic.pl
@@ -52,7 +57,7 @@ $ /opt/theos/bin/nic.pl
 
 参照下图设置
 
-![](/assets/img/note/2017-06-15-theos-configure/0x02.png)
+![](/assets/img/xnu/2017-06-15-theos-configure/0x02.png)
 
 修改Makefile
 ```
@@ -107,7 +112,7 @@ $ make
 
 提示出错，找到SpringBoard.h(可以 class-dump SpringBoard这个 Mach-O文件得到)，放到 /opt/theos/include，删除 #import <SpringBoard/SpringBoard.h>，再次make就能通过
 
-![](/assets/img/note/2017-06-15-theos-configure/0x03.png)
+![](/assets/img/xnu/2017-06-15-theos-configure/0x03.png)
 
 安装tweak
 
@@ -118,6 +123,5 @@ $ make install
 
 输入两次root密码后，设备自动重启，然后就能看到效果
 
-![](/assets/img/note/2017-06-15-theos-configure/0x04.png)
-
-![](/assets/img/note/2017-06-15-theos-configure/0x05.png)
+![](/assets/img/xnu/2017-06-15-theos-configure/0x04.png)
+![](/assets/img/xnu/2017-06-15-theos-configure/0x05.png)

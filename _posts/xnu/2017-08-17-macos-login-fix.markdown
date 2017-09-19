@@ -1,12 +1,13 @@
 ---
 layout:     post
-title:      macOS 10.12.x 登陆bug修复
+title:      macOS 10.12.x登陆bug修复
 author:     wooy0ung
 tags: 		osx
-category:  	note
+category:  	xnu
 ---
 
 
+>说明:  
 >某天用着用着, 一打开Mac终端提示需要login, 输入管理员密码却是incorrect。  
 >重启发现密码不对, 不能登入系统。以下给出两种比较方便的方法:  
 >1. 若本机密码设置成允许AppleID修改, 输入3次错误后会提示通过Apple修改密码, 修改即可。  
@@ -31,6 +32,7 @@ mac重启后再resetpassword。但我操作过后不断重启, 同样不适用�
 注意不要抹除, 因为这只会覆盖必要的系统文件, 个人数据不会丢失, 等待安装完成后resetpassword,
 惊奇发现系统能进了, 而且数据完全没丢失。
 ```
+
 
 ### 0x01 后记
 

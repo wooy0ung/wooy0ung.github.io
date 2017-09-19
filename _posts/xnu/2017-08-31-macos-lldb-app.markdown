@@ -1,9 +1,9 @@
 ---
 layout:     post
-title:      macOS 下利用 lldb 调试应用
+title:      macOS下利用lldb调试App
 author:     wooy0ung
-tags: 		osx
-category:  	note
+tags: 		macos
+category:  	xnu
 ---
 
 
@@ -11,9 +11,9 @@ category:  	note
 >利用 lldb 调试 iOS App, 在 wifi 下延迟较大, 调试器长时间未有响应。  
 >用 usb 线将 iOS 与 Mac 相连, 通过 usbmux 进行端口转发, 调试效果更好。  
 >工具:  
->1. lldb  
->2. usbmux  
->3. voltron  
+>1.lldb  
+>2.usbmux  
+>3.voltron  
 <!-- more -->
 
 
@@ -48,7 +48,7 @@ Waiting for devices...
 ```
 
 
-### 0x01 lldb & voltron
+### 0x01 lldb
 
 lldb attach 上去
 
@@ -59,4 +59,4 @@ $ lldb
 
 attach 成功后, 效果如下
 
-![](/assets/img/note/2017-08-31-osx-lldb-app/0x00.png)
+![](/assets/img/xnu/2017-08-31-macos-lldb-app/0x00.png)

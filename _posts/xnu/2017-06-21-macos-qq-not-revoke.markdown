@@ -2,13 +2,20 @@
 layout:     post
 title:      在macOS下实现QQ消息防撤回
 author:     wooy0ung
-tags: 		osx
-category:  	note
+tags: 		macOS
+category:  	xnu
 ---
+
+
+>说明:
+>先前已经完成了微信的消息防撤回, 但对我个人来说微信的使用次数不比QQ多。
+>那么现在来实现QQ消息防撤回。
+<!-- more -->
+
 
 ### 0x00 配置substitute
 
-下载MacOSX10.11.sdk，放入
+下载MacOSX10.11.sdk，放入  
 /Applications/XCode_8.2.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
 
 ```
@@ -22,18 +29,16 @@ $ sudo svn checkout https://github.com/wooy0ung/ios/trunk/substitute
 $ cd substitute
 $ ./configure --xcode-sdk macosx10.11 && make -j8
 ```
-<!-- more -->
 
 
 ### 0x01 创建工程
 
-![](/assets/img/note/2017-06-21-macos-qq-not-revoke/0x00.png)
-
-![](/assets/img/note/2017-06-21-macos-qq-not-revoke/0x01.png)
+![](/assets/img/xnu/2017-06-21-macos-qq-not-revoke/0x00.png)
+![](/assets/img/xnu/2017-06-21-macos-qq-not-revoke/0x01.png)
 
 将substitute.dylib与substitute.h添加到工程中
 
-![](/assets/img/note/2017-06-21-macos-qq-not-revoke/0x02.png)
+![](/assets/img/xnu/2017-06-21-macos-qq-not-revoke/0x02.png)
 
 修改QQMessageRevoke.m
 
@@ -56,9 +61,9 @@ static void initialize()
 
 编辑Scheme，将默认的编译Debug改为编译Release
 
-![](/assets/img/note/2017-06-21-macos-qq-not-revoke/0x03.png)
+![](/assets/img/xnu/2017-06-21-macos-qq-not-revoke/0x03.png)
 
-![](/assets/img/note/2017-06-21-macos-qq-not-revoke/0x04.png)
+![](/assets/img/xnu/2017-06-21-macos-qq-not-revoke/0x04.png)
 
 编译生成libQQMessageRevoke.dylib
 
@@ -70,6 +75,7 @@ $ svn checkout https://github.com/wooy0ung/ios/trunk/insert_dylib
 // 编译insert_dylib的release版本，放到/usr/local/bin
 $ sudo chmod 777 /usr/local/bin
 ```
+
 
 ### 0x03 注入dylib
 
