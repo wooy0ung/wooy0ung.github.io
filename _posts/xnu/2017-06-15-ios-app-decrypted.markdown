@@ -12,6 +12,7 @@ category:  	xnu
 >dumpdecrypted 会将运行起来已经解密完成的结果dump出来, 得到一个可执行程序。  
 <!-- more -->
 
+
 ### 0x00 dumpdecrypted
 
 ```

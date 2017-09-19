@@ -12,7 +12,7 @@ category:  	xnu
 >支持最新Xcode9和Theos, 一步集成非越狱调试。  
 <!-- more -->
 
-as
+
 ### 0x00 Xcode & Theos
 
 安装最新版的Xcode9, 直接到Apple开发者中心下载xip包(经测试Xcode8报错)
