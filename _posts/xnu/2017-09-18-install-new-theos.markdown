@@ -1,15 +1,15 @@
 ---
 layout:     post
-title:      配置新版 Theos 越狱开发环境
+title:      配置新版Theos越狱开发环境
 author:     wooy0ung
-tags: 		
-category:  	note
+tags: 		  ios
+category:  	xnu
 ---
 
 
 >说明:  
->旧版 Theos 用了一段时间了, 不时地出现点问题实在难受, 还是换新版吧。
->由于 Theos 维护人员的更换, 也导致了配置方法稍有不同。
+>旧版 Theos 用了一段时间了, 不时地出现点问题实在难受, 还是换新版吧。  
+>由于 Theos 维护人员的更换, 也导致了配置方法稍有不同。  
 <!-- more -->
 
 
