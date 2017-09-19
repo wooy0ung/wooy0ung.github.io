@@ -7,9 +7,9 @@ category:  	xnu
 ---
 
 
->说明:
->调试iOS没有类似OD那么友好的UI, 当前在用的IDA也不支持动调iOS...
->好在Voltron提供的脚本很大程度的简化了lldb的调试操作。
+>说明:  
+>调试iOS没有类似OD那么友好的UI, 当前在用的IDA也不支持动调iOS...  
+>好在Voltron提供的脚本很大程度的简化了lldb的调试操作。  
 <!-- more -->
 
 

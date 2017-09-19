@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      WeChat砸壳
+title:      iOS App砸壳
 author:     wooy0ung
 tags: 		ios
 category:  	xnu
