@@ -11,7 +11,7 @@ category:   algorithm
 >输入一个可能含有重复字符的字符串，打印出该字符串中所有字符的全排列，输出时以字典序顺序输出，用空格分隔。  
 >输入数据是一个长度不超过10个字符的字符串，以逗号结尾。    
 <!-- more -->
-
+>
 >样例输入:  
 > abc,  
 >样例输出:  
@@ -58,7 +58,7 @@ int main(){
 
 递归过程如下
 
-![](/assets/img/algorithm/2017-09-24-jsk-char-perm/0x00.png)
+![](/assets/img/algorithm/2017-09-24-jsk-char-perm/0x00.jpg)
 
 注意到cba、cab的输出顺序不对, 下面将递归数据insert到集合, 得到有序的字符全排列
 
