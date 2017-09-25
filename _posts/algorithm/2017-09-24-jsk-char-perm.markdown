@@ -4,6 +4,7 @@ title:      计蒜客 字符全排列
 author:     wooy0ung
 tags: 	    alg
 category:   algorithm
+password:	yes
 ---
 
 

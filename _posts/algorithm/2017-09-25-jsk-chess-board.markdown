@@ -4,6 +4,7 @@ title:      计蒜客 棋盘覆盖
 author:     wooy0ung
 tags: 	    alg
 category:   algorithm
+password:   yes
 ---
 
 
