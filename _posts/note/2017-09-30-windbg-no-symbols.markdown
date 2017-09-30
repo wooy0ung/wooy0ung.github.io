@@ -17,8 +17,12 @@ category:  	note
 
 ![](/assets/img/note/2017-09-30-windbg-no-symbols/0x01.png)
 
-在弹出窗口贴上"SRV*C:\Symbols*http://msdl.microsoft.com/download/symbols", 重新启动调试
+在弹出窗口贴上
+
+```
+SRV*C:\Symbols*http://msdl.microsoft.com/download/symbols
+```
 
 ![](/assets/img/note/2017-09-30-windbg-no-symbols/0x02.png)
 
-现在已经正常了
+重新启动调试, 现在已经正常了
