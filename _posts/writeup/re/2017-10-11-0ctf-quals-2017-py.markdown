@@ -1,0 +1,265 @@
+---
+layout:     post
+title:      0ctf quals 2017 py
+author:     wooy0ung
+tags: 		re
+category:  	writeup
+---
+
+
+>Problem Description:  
+>We permutate the opcode of python2.7, and use it to encrypt the flag.. Try to recover it!  
+>
+>Download:  
+>svn checkout https://github.com/wooy0ung/ctf/trunk/write-ups-2017/0ctf-quals-2017/reverse/py-137
+<!-- more -->
+
+
+### 0x00 uncompyle6
+
+安装uncompyle6
+
+```
+$ git clone https://github.com/rocky/python-uncompyle6.git
+$ cd python-uncompyle6
+$ sudo pip install -e .
+$ sudo pip install -r requirements-dev.txt
+$ sudo python setup.py install
+```
+
+直接反编译报错
+
+![](/assets/img/writeup/re/2017-10-11-0ctf-quals-2017-py/0x00.png)
+
+
+### 0x01 dump pyc
+
+准备以下测试源码, 保存为test.py, 生成pyc文件
+
+```
+$ python -m py_compile test.py
+```
+
+将以下源码保存为pycdump.py
+
+```
+#! /usr/bin/env python
+import dis, marshal, struct, sys, time, types
+
+def show_file(fname):
+    f = open(fname, "rb")
+    magic = f.read(4)
+    moddate = f.read(4)
+    modtime = time.asctime(time.localtime(struct.unpack('<L', moddate)[0]))
+    print "magic %s" % (magic.encode('hex'))
+    print "moddate %s (%s)" % (moddate.encode('hex'), modtime)
+    code = marshal.load(f)
+    show_code(code)
+     
+def show_code(code, indent=''):
+    print "%scode" % indent
+    indent += '   '
+    print "%sargcount %d" % (indent, code.co_argcount)
+    print "%snlocals %d" % (indent, code.co_nlocals)
+    print "%sstacksize %d" % (indent, code.co_stacksize)
+    print "%sflags %04x" % (indent, code.co_flags)
+    show_hex("code", code.co_code, indent=indent)
+    dis.disassemble(code)
+    print "%sconsts" % indent
+    for const in code.co_consts:
+        if type(const) == types.CodeType:
+            show_code(const, indent+'   ')
+        else:
+            print "   %s%r" % (indent, const)
+    print "%snames %r" % (indent, code.co_names)
+    print "%svarnames %r" % (indent, code.co_varnames)
+    print "%sfreevars %r" % (indent, code.co_freevars)
+    print "%scellvars %r" % (indent, code.co_cellvars)
+    print "%sfilename %r" % (indent, code.co_filename)
+    print "%sname %r" % (indent, code.co_name)
+    print "%sfirstlineno %d" % (indent, code.co_firstlineno)
+    show_hex("lnotab", code.co_lnotab, indent=indent)
+     
+def show_hex(label, h, indent):
+    h = h.encode('hex')
+    if len(h) < 60:
+        print "%s%s %s" % (indent, label, h)
+    else:
+        print "%s%s" % (indent, label)
+        for i in range(0, len(h), 60):
+            print "%s   %s" % (indent, h[i:i+60])
+
+show_file(sys.argv[1])
+```
+
+反编译test.pyc
+
+```
+$ python pycdump.py test.pyc
+```
+
+![](/assets/img/writeup/re/2017-10-11-0ctf-quals-2017-py/0x01.png)
+
+到这里已经能正常反编译pyc文件了
+
+
+### 0x02 crack
+
+反编译crypt.pyc, 发现还是报错, 猜测代码被混淆过
+
+![](/assets/img/writeup/re/2017-10-11-0ctf-quals-2017-py/0x02.png)
+
+注释掉pycdump.py的dis.disassemble(code)一句, 再次反编译
+
+```
+$ python pycdump.py crypt.pyc
+magic 03f30d0a
+moddate 66346f58 (Fri Jan  6 14:08:38 2017)
+code
+   argcount 0
+   nlocals 0
+   stacksize 2
+   flags 0040
+   code
+      990000990100860000910000990200880000910100990300880000910200
+      99010053
+   consts
+      -1
+      None
+      code
+         argcount 1
+         nlocals 6
+         stacksize 3
+         flags 0043
+         code
+            990100680100990200680200990300680300610100990400469905002761
+            020061010027610300279906004627990500276102009906004627990700
+            276804009b00006001006104008301006805006105006002006100008301
+            0053
+         consts
+            None
+            '!@#$%^&*'
+            'abcdefgh'
+            '<>{}:"'
+            4
+            '|'
+            2
+            'EOF'
+         names ('rotor', 'newrotor', 'encrypt')
+         varnames ('data', 'key_a', 'key_b', 'key_c', 'secret', 'rot')
+         freevars ()
+         cellvars ()
+         filename '/Users/hen/Lab/0CTF/py/crypt.py'
+         name 'encrypt'
+         firstlineno 2
+         lnotab 00010601060106012e010f01
+      code
+         argcount 1
+         nlocals 6
+         stacksize 3
+         flags 0043
+         code
+            990100680100990200680200990300680300610100990400469905002761
+            020061010027610300279906004627990500276102009906004627990700
+            276804009b00006001006104008301006805006105006002006100008301
+            0053
+         consts
+            None
+            '!@#$%^&*'
+            'abcdefgh'
+            '<>{}:"'
+            4
+            '|'
+            2
+            'EOF'
+         names ('rotor', 'newrotor', 'decrypt')
+         varnames ('data', 'key_a', 'key_b', 'key_c', 'secret', 'rot')
+         freevars ()
+         cellvars ()
+         filename '/Users/hen/Lab/0CTF/py/crypt.py'
+         name 'decrypt'
+         firstlineno 10
+         lnotab 00010601060106012e010f01
+   names ('rotor', 'encrypt', 'decrypt')
+   varnames ()
+   freevars ()
+   cellvars ()
+   filename '/Users/hen/Lab/0CTF/py/crypt.py'
+   name '<module>'
+   firstlineno 1
+   lnotab 0c010908
+```
+
+查看python字节码, 还原源码
+
+```
+'''
+990100680100990200680200990300680300610100990400469905002761
+020061010027610300279906004627990500276102009906004627990700
+276804009b00006001006104008301006805006105006002006100008301
+0053
+'''
+
+990100	LOAD_CONST	1 ('!@#$%^&*')
+680100	STORE_NAME	1 (key_a)
+990200	LOAD_CONST	2 ('abcdefgh')
+680200	STORE_NAME	2 (key_b)
+990300	LOAD_CONST	3 ('<>{}:"')
+680300	STORE_NAME	3 (key_c)
+610100	LOAD_FAST	1 (key_a)
+990400	LOAD_CONST	4 (4)
+46
+990500	LOAD_CONST	5 ('|')
+27
+610200	LOAD_FAST	2 (key_b)
+610100	LOAD_FAST	1 (key_a)
+27
+610300	LOAD_FAST	3 (key_c)
+27
+990600	LOAD_CONST	6 (2)
+46
+27
+990500	LOAD_CONST	5 ('|')
+27
+610200	LOAD_FAST	2 (key_b)
+990600	LOAD_CONST	6 (2)
+46
+27
+990700	LOAD_CONST	7 ('EOF')
+27
+680400	STORE_NAME	4 (secret)
+9b0000	LOAD_GLOBAL	0 (rotor)
+600100	LOAD_ATTR	1 (newrotor)
+610400	LOAD_FAST	4 (secret)
+830100	CALL_FUNCTION 1
+680500	STORE_NAME	5 (rot)
+610500	LOAD_FAST	0 (rot) 
+600200	LOAD_ATTR	2 (decrypt)
+610000	LOAD_FAST	0 (data)
+830100	CALL_FUNCTION 1
+53	RETURN_VALUE
+```
+
+得到脚本
+
+```
+import rotor
+
+def decrypt(data):
+	key_a = '!@#$%^&*'
+	key_b = 'abcdefgh'
+	key_c = '<>{}:"'
+	
+	secret = key_a*4 + '|' + (key_b+key_a+key_c)*2 + '|' + key_b*2 + 'EOF'
+	
+	rot = rotor.newrotor(secret)
+	return rot.decrypt(data)
+
+i = open("encrypted_flag", "rb").read()
+
+print decrypt(i)
+```
+
+get flag~
+
+![](/assets/img/writeup/re/2017-10-11-0ctf-quals-2017-py/0x03.png)
