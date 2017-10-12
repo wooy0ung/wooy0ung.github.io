@@ -90,4 +90,4 @@ print plain
 
 get flag~
 
-![](/assets/img/writeup/re/2017-10-11-jarvisoj-smali/0x00.png)
+![](/assets/img/writeup/re/2017-10-12-jarvisoj-smali/0x00.png)
