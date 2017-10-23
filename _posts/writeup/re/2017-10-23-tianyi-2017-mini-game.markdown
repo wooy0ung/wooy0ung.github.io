@@ -11,10 +11,12 @@ category:  	writeup
 >玩游戏, 拿到一定的分数就给提示。
 >  
 >Download:  
->svn checkout https://github.com/wooy0ung/ctfs/trunk/write-ups-2017/%E6%B1%9F%E8%8B%8F%E7%9C%81%E5%A4%A9%E7%BF%BC%E6%9D%AF-2017/%E7%A7%BB%E5%8A%A8%E5%AE%89%E5%85%A8/%E8%BF%B7%E4%BD%A0%E6%B8%B8%E6%88%8F_50pt  
+>svn checkout https://github.com/wooy0ung/ctfs/trunk/
+>write-ups-2017/%E6%B1%9F%E8%8B%8F%E7%9C%81%E5%A4%A9%E7%BF%BC%E6%9D%AF-2017/
+>%E7%A7%BB%E5%8A%A8%E5%AE%89%E5%85%A8/%E8%BF%B7%E4%BD%A0%E6%B8%B8%E6%88%8F_50pt  
 >
 >Addition:  
->这是个贪吃蛇游戏, 检查源码硬是没找到在哪生成的flag, 最后还是靠战队里的大表哥@appl3做出来了, 脑洞不够大啊23333333。
+>这是个贪吃蛇游戏, 检查源码硬是没找到在哪生成的flag, 最后还是靠战队里的大表哥做出来了, 脑洞不够大啊23333333。
 <!-- more -->
 
 
