@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      天翼杯 2017 迷你游戏
+title:      江苏省天翼杯 2017 迷你游戏
 author:     wooy0ung
 tags: 		re
 category:  	writeup
@@ -19,8 +19,6 @@ category:  	writeup
 >这是个贪吃蛇游戏, 检查源码硬是没找到在哪生成的flag, 最后还是靠战队里的大表哥做出来了, 脑洞不够大啊23333333。
 <!-- more -->
 
-
-### 0x00 crack
 
 祭出神器jeb, 定位到这里
 

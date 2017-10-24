@@ -18,8 +18,6 @@ category:  	writeup
 <!-- more -->
 
 
-### 0x00 crack
-
 拿到*.smali文件, 用Smali2Java工具转成*.java
 
 ```

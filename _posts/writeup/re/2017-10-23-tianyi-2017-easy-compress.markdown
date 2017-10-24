@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      天翼杯 2017 简单压缩
+title:      江苏省天翼杯 2017 简单压缩
 author:     wooy0ung
 tags: 		re
 category:  	writeup
@@ -14,11 +14,9 @@ category:  	writeup
 >svn checkout https://github.com/wooy0ung/ctfs/trunk/write-ups-2017/%E6%B1%9F%E8%8B%8F%E7%9C%81%E5%A4%A9%E7%BF%BC%E6%9D%AF-2017/%E9%80%86%E5%90%91%E7%A0%B4%E8%A7%A3/%E7%AE%80%E5%8D%95%E5%8E%8B%E7%BC%A9_75pt  
 >  
 >Addition:  
->一道简单的mac逆向, 不知道为何当时没几队能做出来......(ｏ´_｀ｏ)ﾊｧ･･･。不过整个比赛下来才搞出来这个题, 还是太弱了2333333。
+>一道简单的mac逆向, 不知道为什么当时没几队能做出来......(ｏ´_｀ｏ)ﾊｧ･･･。不过整个比赛下来才搞出来这个题, 还是太弱了2333333。
 <!-- more -->
 
-
-### 0x00 crack
 
 解压后发现是一个.app包, 直接运行报错
 

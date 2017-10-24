@@ -18,8 +18,6 @@ category:  	writeup
 <!-- more -->
 
 
-### 0x00 crack
-
 导入到dnSpy, 发现是AES加密但被混淆过, 在此处下断
 
 ![](/assets/img/writeup/re/2017-10-12-jarvisoj-classical-crackme2/0x00.png)
@@ -46,9 +44,6 @@ category:  	writeup
 ```
 enc_flag="x/nzolo0TTIyrEISd4AP1spCzlhSWJXeNbY81SjPgmk=+"
 ```
-
-
-### 0x01 crack
 
 写个脚本作AES解密, 注意加密模式
 

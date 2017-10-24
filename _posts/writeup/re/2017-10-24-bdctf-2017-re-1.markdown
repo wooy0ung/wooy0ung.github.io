@@ -1,0 +1,27 @@
+---
+layout:     post
+title:      BDCTF 2017 逆向签到
+author:     wooy0ung
+tags: 		re
+category:  	writeup
+---
+
+
+>Problem Description:  
+>恩，格式flag{xxxx}  
+>  
+>Download:  
+>svn checkout https://github.com/wooy0ung/ctfs/tree/master/write-ups-2017/  
+>BDCTF-2017/Reverse/%E9%80%86%E5%90%91%E7%AD%BE%E5%88%B0_60pt  
+<!-- more -->
+
+
+UPX脱壳, 定位到关键点
+
+![](/assets/img/writeup/re/2017-10-24-bdctf-2017-re-1/0x00.png)
+
+程序要求输入一个int, 然后打印18个字符, 看到v21=91, 猜测此位打印'}'
+
+![](/assets/img/writeup/re/2017-10-24-bdctf-2017-re-1/0x01.png)
+
+v22=125+91+17=233, 输入, getflag~

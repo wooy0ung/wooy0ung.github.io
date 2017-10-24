@@ -15,8 +15,6 @@ category:  	writeup
 <!-- more -->
 
 
-### 0x00 crack
-
 反编译apk, 定位到MainActivity
 
 ![](/assets/img/writeup/re/2017-10-13-jarvisoj-findpass/0x00.png)
