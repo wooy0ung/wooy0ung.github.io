@@ -110,7 +110,7 @@ for x4 in range(256):
 
 ### 0x02 crack
 
-再把表copy出来
+把表copy出来, 发现是S盒子, 找到对应的逆S盒子表
 
 ```
 pad = 
