@@ -142,3 +142,92 @@ h4py-anUz-Z7kq-fkxp
 ```
 XCTF{D2LU-BMVY-Y7HP-BGTL}
 ```
+
+
+### 0x02 中二的成长之路
+
+```
+说明: 我用真心对你，你却用QR敷衍我。
+Hint1: 试试QR的哈希，并且注意红字。
+Hint2: 使用图片显示的某些信息做哈希
+Hint3: 再次观察图片，看看不一样的颜色和字体，也许需要做一下哈希
+```
+
+拿到图片binwalk扫一下, 发现有隐写文件, foremost命令分离
+
+![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x06.png)
+
+打开压缩包, 需要密码, 扫二维码得到"3ukka4wZf2Q9H8PEI5YKFA==", base64解码乱码
+
+![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x07.png)
+
+根据提示, 对"QR"做一次hash作为key解AES
+
+![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x08.png)
+
+解压缩包, 又得到一张二维码
+
+![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x09.png)
+
+图片名作key, 再解一次AES, 得到flag
+
+![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x10.png)
+
+解密脚本
+
+```
+#!/usr/bin/python
+# -*- coding:utf8 -*-
+
+from Crypto.Cipher import AES
+import hashlib
+
+key = hashlib.md5("QR").hexdigest()
+enc = "3ukka4wZf2Q9H8PEI5YKFA=="
+
+plain = AES.new(key,AES.MODE_ECB).decrypt(enc.decode("base64"))
+
+print plain
+# 1Znmpr4jzChwxXqB
+
+key = "s776051080zum92N"
+enc = "bqIGBfOGuOsxLYV16OI7xRNAZrcFdYLJtHaDym2O7so="
+
+plain = AES.new(key,AES.MODE_ECB).decrypt(enc.decode("base64"))
+
+print plain
+# XCTF{W0W_U_G0T_TH3_FL4G}
+```
+
+
+### 0x03 神秘的TXT 
+
+```
+说明: 你从哪里来的呀？
+```
+
+得到一串字符
+```
+XCTF{(37,99)(19,99)(19,108)(28,99)(28,108)(37,108)(37,117)(28,117)(19,117)}
+```
+
+像是3x3的坐标, 猜测是手机键盘密码, 坐标有8种组合方式
+
+```
+x:(19,28,37)	y:(99,108,117)
+x:(19,28,37)	y:(117,108,99)
+x:(37,28,19)	y:(99,108,117)
+x:(37,28,19)	y:(117,108,99)
+x:(99,108,117)	y:(19,28,37)
+x:(99,108,117)	y:(37,28,19)
+x:(117,108,99)	y:(19,28,37)
+x:(117,108,99)	y:(37,28,19)
+
+---------------------------------
+
+1	2	3
+4	5	6
+7	8	9
+```
+
+得到8串可能的flag, 逐一提交
