@@ -11,7 +11,7 @@ category:  	writeup
 >http://xman.xctf.org.cn/  
 >  
 >Download:  
->svn checkout https://github.com/wooy0ung/ctfs/trunk/write-ups-2018/xman-mobile-2018  
+>svn checkout https://github.com/wooy0ung/ctfs/trunk/write-ups-2018/xman-quals-2018  
 >
 >这次意外拿到了门票, 无奈跟课程考试冲突了(｡•́︿•̀｡)
 <!-- more -->
@@ -20,19 +20,19 @@ category:  	writeup
 
 apk直接拖到jeb
 
-![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x01.png)
+![](/assets/img/writeup/normal/2018-01-07-xman-quals-2018/0x01.png)
 
 定位到onClick方法
 
-![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x02.png)
+![](/assets/img/writeup/normal/2018-01-07-xman-quals-2018/0x02.png)
 
 发现调用package a.a, 跟过去
 
-![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x03.png)
+![](/assets/img/writeup/normal/2018-01-07-xman-quals-2018/0x03.png)
 
 这里判断每位注册码是否在0~9、A~Z、a~z里面, 注册码类似xxxx-yyyy-zzzz-uuuu这种形式
 
-![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x04.png)
+![](/assets/img/writeup/normal/2018-01-07-xman-quals-2018/0x04.png)
 
 这里对注册码进行校验
 
@@ -116,7 +116,7 @@ for i in table:
 
 ```
 
-![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x05.png)
+![](/assets/img/writeup/normal/2018-01-07-xman-quals-2018/0x05.png)
 
 得到以下几组满足条件的注册码
 
@@ -155,23 +155,23 @@ Hint3: 再次观察图片，看看不一样的颜色和字体，也许需要做�
 
 拿到图片binwalk扫一下, 发现有隐写文件, foremost命令分离
 
-![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x06.png)
+![](/assets/img/writeup/normal/2018-01-07-xman-quals-2018/0x06.png)
 
 打开压缩包, 需要密码, 扫二维码得到"3ukka4wZf2Q9H8PEI5YKFA==", base64解码乱码
 
-![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x07.png)
+![](/assets/img/writeup/normal/2018-01-07-xman-quals-2018/0x07.png)
 
 根据提示, 对"QR"做一次hash作为key解AES
 
-![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x08.png)
+![](/assets/img/writeup/normal/2018-01-07-xman-quals-2018/0x08.png)
 
 解压缩包, 又得到一张二维码
 
-![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x09.png)
+![](/assets/img/writeup/normal/2018-01-07-xman-quals-2018/0x09.png)
 
 图片名作key, 再解一次AES, 得到flag
 
-![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x10.png)
+![](/assets/img/writeup/normal/2018-01-07-xman-quals-2018/0x10.png)
 
 解密脚本
 
