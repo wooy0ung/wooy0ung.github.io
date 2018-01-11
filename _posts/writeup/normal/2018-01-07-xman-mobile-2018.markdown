@@ -12,6 +12,8 @@ category:  	writeup
 >  
 >Download:  
 >svn checkout https://github.com/wooy0ung/ctfs/trunk/write-ups-2018/xman-mobile-2018  
+>
+>这次意外拿到了门票, 无奈跟课程考试冲突了(｡•́︿•̀｡)
 <!-- more -->
 
 ### 0x01 返老还童
