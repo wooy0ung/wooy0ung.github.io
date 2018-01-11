@@ -1,0 +1,142 @@
+---
+layout:     post
+title:      XMAN冬令营选拔赛部分writeup
+author:     wooy0ung
+tags: 		normal
+category:  	writeup
+---
+
+
+>Problem Address:  
+>http://xman.xctf.org.cn/  
+>  
+>Download:  
+>svn checkout https://github.com/wooy0ung/ctfs/trunk/write-ups-2018/xman-mobile-2018  
+<!-- more -->
+
+### 0x01 返老还童
+
+apk直接拖到jeb
+
+![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x01.png)
+
+定位到onClick方法
+
+![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x02.png)
+
+发现调用package a.a, 跟过去
+
+![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x03.png)
+
+这里判断每位注册码是否在0~9、A~Z、a~z里面, 注册码类似xxxx-yyyy-zzzz-uuuu这种形式
+
+![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x04.png)
+
+这里对注册码进行校验
+
+```
+v1表示xxxx段, v2表示uuuu段, 要求满足以下条件
+v1[0] == v2[1] – 3
+v2[0] == v1[0] - 4 / 2
+v2[2] % 2 != 1
+v2[2] == v1[2] + 4 * 2
+v1[3] == (((char)(v2[2] | 1)))
+v1[1] * 2 == v1[2] – 8
+v2[3] == v1[2]
+v2[1] == (((char)(v1[3] ^ 18)))
+a = v2[3] ^ 55  < 100	// 并且最后把a值输出出来
+--------------------------------------------
+v1表示yyyy段, v2表示zzzz段，要求满足以下条件
+4 * 3 + v1[1] == v1[3]
+(v2[2] ^ v1[1]) == 5
+(v1[0] ^ v1[1]) == 15
+v1[0] + v2[0] == 187
+v1[0] + v2[3] == 210
+v2[1] * 2 == v1[3] – 11
+(v1[3] ^ v1[2]) == 47
+b = v1[2] - 4 ^ 113		// 最后把b值输出出来
+--------------------------------------------
+注册码组合必须满足a > b
+```
+
+爆破注册码
+
+```
+#!/usr/bin/python
+# -*- coding:utf8 -*-
+
+table = ['0','1','2','3','4','5','6','7','8','9',
+		'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+		'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+
+pad = [0,0,0,0,0,0,0,0]
+
+for i in table:
+	if ord(i) % 2 != 1:
+		pad[6] = i
+		if chr(ord(i) - 8) in table:
+			pad[2] = chr(ord(i) - 8)
+			if chr(ord(i) | 1) in table:
+				pad[3] = chr(ord(i) | 1)
+				if chr((ord(i) - 16)/2) in table:
+					pad[1] = chr((ord(i) - 16)/2)
+					if chr(ord(i) - 8) in table and ((ord(i) - 8) ^ 55) < 100:
+						pad[7] = chr(ord(i) - 8)
+						if chr((ord(i) | 1) ^ 18) in table:
+							pad[5] = chr((ord(i) | 1) ^ 18)
+							if chr(((ord(i) | 1) ^ 18) - 3) in table:
+								pad[0] = chr(((ord(i) | 1) ^ 18) - 3)
+								if chr(((ord(i) | 1) ^ 18) - 5) in table:
+									pad[4] = chr(((ord(i) | 1) ^ 18) - 5)
+									print pad,ord(pad[7]) ^ 55
+print ""
+print ""
+
+pad2 = [0,0,0,0,0,0,0,0]
+
+for i in table:
+	pad2[1] = i
+	if chr(ord(i) + 12) in table:
+		pad2[3] = chr(ord(i) + 12)
+		if chr(ord(i) ^ 5) in table:
+			pad2[6] = chr(ord(i) ^ 5)
+			if chr(ord(i) ^ 15) in table:
+				pad2[0] = chr(ord(i) ^ 15)
+				if chr(187 - (ord(i) ^ 15)) in table:
+					pad2[4] = chr(187 - (ord(i) ^ 15))
+					if chr(210 - (ord(i) ^ 15)) in table:
+						pad2[7] = chr(210 - (ord(i) ^ 15))
+						if chr((ord(i) + 1)/2) in table:
+							pad2[5] =  chr((ord(i) + 1)/2)
+							if chr((ord(i) + 12) ^ 47) in table:
+								pad2[2] = chr((ord(i) + 12) ^ 47)
+								print pad2,ord(pad2[2]) - 4 ^ 113
+
+```
+
+![](/assets/img/writeup/normal/2018-01-07-xman-mobile-2018/0x05.png)
+
+得到以下几组满足条件的注册码
+
+```
+d2lu-naBm-M1dd-bgtl
+d2lu-mbAn-N1ge-bgtl
+d2lu-fiZu-U5ll-bgtl
+d2lu-ejYv-V5om-bgtl
+d2lu-dkXw-W6nn-bgtl
+d2lu-clWx-X6io-bgtl
+d2lu-bmVy-Y7hp-bgtl
+d2lu-anUz-Z7kq-bgtl
+--------------------------------------------
+h4py-fiZu-U5ll-fkxp
+h4py-ejYv-V5om-fkxp
+h4py-dkXw-W6nn-fkxp
+h4py-clWx-X6io-fkxp
+h4py-bmVy-Y7hp-fkxp
+h4py-anUz-Z7kq-fkxp
+```
+
+逐一提交, 得到正确flag
+```
+XCTF{D2LU-BMVY-Y7HP-BGTL}
+```
