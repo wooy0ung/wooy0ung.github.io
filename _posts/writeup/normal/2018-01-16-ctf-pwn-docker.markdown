@@ -146,7 +146,7 @@ nc上去
 ![](/assets/img/writeup/normal/2018-01-16-ctf-pwn-docker/0x02.png)
 
 
-###0x04 拉取libc.so
+### 0x04 拉取libc.so
 
 运行docker镜像
 
