@@ -19,6 +19,8 @@ category:  	note
 <!-- more -->
 >0x009 安装wine容器  
 >0x010 安装Reveal8 & 分析iOS UI  
+>0x011 解决Github Authentication failed  
+>0x012 配置php环境  
 
 
 ## 0x001 解决macOS 10.12.x软件包提示损坏
@@ -462,3 +464,85 @@ $ lldb
 发现激活码直接通过NSLog打印出来了, 打开控制台观察Reveal
 ![](/assets/img/note/2018-02-21-macos-environment/0x010-004.png)
 "ens:"后面的字串就是激活码
+
+
+## 0x011 解决Github Authentication failed
+
+说明：
+今天mac出现 login fail 问题, 终于修好了, 因为更改了钥匙串, github desktop 又出现 Authentication failed 的问题。  
+![](/assets/img/note/2018-02-21-macos-environment/0x010-001.png)
+
+先用以下命令完成一次push
+```
+$ git add --all
+$ git commit -m "Initial commit"
+$ git push -u origin master
+```
+
+中途提示输入username和password
+```
+Username for 'https://github.com': wooy0ung
+Password for 'https://wooy0ung@github.com':
+```
+
+输入后push完成, 回到 github desktop 注销账号后再登入, 以后就正常了
+
+
+## 0x012 配置php环境
+
+打开Apache
+```
+$ sudo apachectl start
+Password:
+/System/Library/LaunchDaemons/org.apache.httpd.plist: service already loaded
+```
+
+访问localhost, 确认Apache正常
+![](/assets/img/note/2018-02-21-macos-environment/0x011-001.png)
+
+Apache添加php支持
+```
+$ sudo nano /etc/apache2/httpd.conf
+Password:
+```
+
+取消这句注释
+```
+LoadModule php5_module libexec/apache2/libphp5.so
+```
+
+重启Apache
+```
+$ sudo apachectl restart
+```
+
+cd到/Library/WebServer/Documents, sudo nano demo.php新建一个文件, 贴上以下代码
+```
+<?php phpinfo(); ?>
+```
+
+浏览器访问localhost/demo.php, 确认是否正常
+![](/assets/img/note/2018-02-21-macos-environment/0x011-002.png)
+
+选择Tools->Build System->New Build System..., 贴入以下代码
+```
+{ 
+    "cmd": ["php", "$file"],
+    "file_regex": "php$", 
+    "selector": "source.php" 
+}
+```
+
+更名为php.sublime-build, 保存在默认目录
+```
+<?php
+$strDemo = 'demo';
+echo $strDemo;
+?>
+```
+
+新建一个文件, 贴入以上代码, 保存为demo.php
+![](/assets/img/note/2018-02-21-macos-environment/0x011-003.png)
+
+Build System选择php, command+B运行
+![](/assets/img/note/2018-02-21-macos-environment/0x011-004.png)
