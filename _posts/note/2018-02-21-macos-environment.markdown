@@ -14,7 +14,11 @@ category:  	note
 >0x004 iOS app砸壳  
 >0x005 利用lldb调试app  
 >0x006 用Voltron增强lldb  
+>0x007 配置新版theos越狱开发环境  
+>0x008 配置MonkeyDev集成环境  
 <!-- more -->
+>0x009 安装wine容器  
+>0x010 安装Reveal8 & 分析iOS UI  
 
 
 ### 0x001 解决macOS 10.12.x软件包提示损坏
@@ -291,3 +295,170 @@ $ voltron view stack
 $ voltron view register
 ```
 ![](/assets/img/note/2018-02-21-macos-environment/0x006-002.png)
+
+
+### 0x007 配置新版theos越狱开发环境
+
+安装打包 & 签名工具
+```
+$ brew install dpkg ldid
+```
+
+安装theos
+```
+$ sudo git clone --recursive https://github.com/theos/theos.git /opt/theos
+```
+
+赋予权限
+```
+$ sudo chown $(id -u):$(id -g) /opt/theos
+```
+
+添加环境变量(.bash_profile)
+```
+export THEOS=/opt/theos
+export PATH=/opt/theos/bin/:$PATH
+```
+
+测试
+```
+$ nic.pl
+NIC 2.0 - New Instance Creator
+------------------------------
+  [1.] iphone/activator_event
+  [2.] iphone/application_modern
+  [3.] iphone/cydget
+  [4.] iphone/flipswitch_switch
+  [5.] iphone/framework
+  [6.] iphone/ios7_notification_center_widget
+  [7.] iphone/library
+  [8.] iphone/notification_center_widget
+  [9.] iphone/preference_bundle_modern
+  [10.] iphone/tool
+  [11.] iphone/tweak
+  [12.] iphone/xpc_service
+Choose a Template (required):
+```
+
+注意: 新版theos“sudo /opt/theos/bin/bootstrap.sh substrate”这一句已经去除, 也不用到 Cydia 下 copy libsubstrate.dylib, 相比旧版来说简化了安装步骤。
+
+
+### 0x008 配置MonkeyDev集成环境
+
+安装最新版的Xcode9 & theos
+```
+$ sudo xcode-select -s /Applications/Xcode_9.0.app/Contents/Developer
+```
+
+安装MonkeyDev
+```
+$ cd /opt
+$ git clone https://github.com/AloneMonkey/MonkeyDev.git
+$ cd MonkeyDev/bin
+$ sudo ./md-install
+# 卸载
+$ sudo ./md-uninstall
+```
+
+完成后, 到新建工程界面, 如下图就是成功装上
+![](/assets/img/note/2018-02-21-macos-environment/0x008-001.png)
+
+新建一个MonkeyApp
+![](/assets/img/note/2018-02-21-macos-environment/0x008-002.png)
+
+直接编译安装到iOS, 打开Reveal8也能正常连接
+![](/assets/img/note/2018-02-21-macos-environment/0x008-003.png)
+
+参考:
+[iOSOpenDev修改版MonkeyDev](http://www.alonemonkey.com/2017/06/28/monkeydev/)
+[无须越狱、自动集成、只需要一个砸壳的应用---MonkeyDev](http://www.alonemonkey.com/2017/07/12/monkeydev-without-jailbreak/)
+
+
+### 0x009 安装wine容器
+
+安装wine & winetricks
+```
+$ brew install wine
+$ brew install winetricks
+```
+
+配置wine & winetricks
+```
+$ winecfg
+```
+
+弹出需要下载缺少的组件，选择是即可，然后选择windows 7版本
+![](/assets/img/note/2018-02-21-macos-environment/0x009-001.png)
+
+安装常用组件
+```
+$ winetricks comctl32
+$ winetricks comctl32ocx
+$ winetricks comdlg32ocx
+$ winetricks riched30
+$ winetricks richtx32
+$ winetricks mdac28
+$ winetricks jet40
+$ winetricks mfc42
+$ winetricks msxml6
+$ winetricks vb6run
+$ winetricks vcrun6sp6
+$ winetricks vcrun2003
+$ winetricks vcrun2005
+$ winetricks vcrun2008
+$ winetricks vcrun2010
+$ winetricks vcrun2012
+$ winetricks vcrun2013
+$ winetricks vcrun2015
+```
+
+配置字体 & 显示
+```
+$ winetricks wenquanyi
+$ winetricks fakechinese
+$ winetricks ddr=opengl
+$ winetricks fontsmooth=rgb
+```
+
+关闭输出调试信息
+```
+// 将 export WINEDEBUG=-all 添加到 .bash_profile
+$ source ./.bash_profile
+```
+
+常用命令
+```
+$ wine *.exe
+$ wine msiexec /i *.msi
+$ regedit	# 注册表
+$ control	# 控制面板
+```
+
+
+### 0x010 安装Reveal8 & 分析iOS UI
+
+说明:  
+最近在配置MonkeyDev, 因为是 iOS 10.3.2 的机器, 旧版的Reveal都不能正常工作...  
+找到一个Reveal8的破解版, 但破解者需要收费, 这就不太厚道了...下面就来破解这个简单的激活码校验。
+
+将包里的 librevealcrack.dylib 拖到hopper分析
+![](/assets/img/note/2018-02-21-macos-environment/0x010-001.png)
+
+这些方法与注册窗口相关, 接下来确定那个是注册窗口中"Go"按钮的调用方法, 可以用lldb测试
+```
+$ lldb
+(lldb) process attach --pid reveal_pid
+(lldb) list image -o -f
+(lldb) br s -a librevealcrack.dylib_base_addr+0x0000000000001c85
+```
+按下"Go", 断点断下, 确定[RegisterWindow hhhhjjjjjxxxx]是关键方法
+
+![](/assets/img/note/2018-02-21-macos-environment/0x010-002.png)
+这里字串比较不相同返回 0, 跳到激活失败, 直接nop掉, 但重启后无效
+
+再看看校验流程, 源串经过 base64hmacsha1(key=NSLog) 加密后, 与输入串比较
+![](/assets/img/note/2018-02-21-macos-environment/0x010-003.png)
+
+发现激活码直接通过NSLog打印出来了, 打开控制台观察Reveal
+![](/assets/img/note/2018-02-21-macos-environment/0x010-004.png)
+"ens:"后面的字串就是激活码
