@@ -12,6 +12,8 @@ category:  	note
 >0x002 macOS 10.12.x登陆bug修复  
 >0x003 安装theos越狱开发环境  
 >0x004 iOS app砸壳  
+>0x005 利用lldb调试app  
+>0x006 用Voltron增强lldb  
 <!-- more -->
 
 
@@ -223,3 +225,69 @@ $ class-dump -s -S -H ~/WeChat.decrypted -o ~/header
 
 dump出8000+的header，砸壳成功
 ![](/assets/img/note/2018-02-21-macos-environment/0x004-003.png)
+
+
+### 0x005 利用lldb调试app
+
+将本地2222端口转发到iOS的22端口
+```
+$ /Users/wooy0ung/toolchain/operation_system/OSX/Debuggers/usbmux/tcprelay.py -t 22:2222
+Forwarding local port 2222 to remote port 22
+Incoming connection to 2222
+Waiting for devices...
+```
+
+ssh过去, debugserver attach待调试应用
+```
+$ ssh root@localhost -p 2222
+$ root@localhost's password:
+root# debugserver *:7000 -a "level1"
+root# debugserver-310.2 for arm64.
+Attaching to process level1...
+```
+
+本地7000端口转发到iOS的7000端口
+```
+$ /Users/wooy0ung/toolchain/operation_system/OSX/Debuggers/usbmux/tcprelay.py -t 7000:7000
+Forwarding local port 7000 to remote port 7000
+Incoming connection to 7000
+Waiting for devices...
+```
+
+lldb attach
+```
+$ lldb
+(lldb) process connect connect://localhost:7000
+```
+![](/assets/img/note/2018-02-21-macos-environment/0x005-001.png)
+
+
+### 0x006 用Voltron增强lldb
+
+安装Voltron
+```
+$ sudo svn checkout https://github.com/wooy0ung/ios/trunk/voltron
+$ cd voltron
+$ ./install.sh
+
+# 这里有个bug，voltron的executable会自动链接到/usr/local/bin，要再通过brew安装
+$ brew install voltron
+```
+
+开启lldb本地调试，下断，运行
+```
+$ lldb ./test
+$ b 1
+$ r
+```
+![](/assets/img/note/2018-02-21-macos-environment/0x006-001.png)
+
+开启Voltron观测窗口
+```
+$ voltron view disasm
+$ voltron view breakpoints
+$ voltron view backtrace
+$ voltron view stack
+$ voltron view register
+```
+![](/assets/img/note/2018-02-21-macos-environment/0x006-002.png)
