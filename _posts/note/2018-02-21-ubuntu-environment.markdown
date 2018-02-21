@@ -13,6 +13,7 @@ category:  	note
 >0x003 安装python2 & python3  
 >0x004 安装pwntools  
 >0x005 安装32位运行库  
+>0x006 修复/root/.profile加载错误  
 <!-- more -->
 
 
@@ -91,3 +92,17 @@ $ sudo dpkg --add-architecture i386
 $ sudo apt-get update
 $ sudo apt-get install libc6:i386 libc6-dev-i386 libncurses5:i386 libstdc++6:i386 zlib1g:i386
 ```
+
+
+## 0x006 修复/root/.profile加载错误
+
+现象：
+![](/assets/img/note/2018-02-21-ubuntu-environment/0x006-001.png)
+
+编辑/root/.profile文件
+```
+tty -s && mesg n || true
+```
+![](/assets/img/note/2018-02-21-ubuntu-environment/0x006-002.png)
+
+重启
