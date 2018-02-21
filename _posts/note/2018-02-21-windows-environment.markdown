@@ -53,6 +53,6 @@ HEKY_CLASSES_ROOT\directory\background\shellex\contextmenuhandlers
 ![](/assets/img/note/2018-02-21-windows-environment.markdown/0x004-001.png)
 
 打开Edit->Users新建用户，添加共享目录
-![](/assets/img/note/2018-02-21-windows-environment.markdown/0x004-002.png)
+![](/assets/img/note/2018-02-21-windows-environment.markdown/0x004_002.png)
 
 客户机通过主机ip和21端口进行连接，可能需要关闭防火墙
