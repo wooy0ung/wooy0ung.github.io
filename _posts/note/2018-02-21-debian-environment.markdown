@@ -13,7 +13,7 @@ category:  	note
 <!-- more -->
 
 
-### 0x001 启用内置root用户
+## 0x001 启用内置root用户
 
 登录root
 ```
@@ -36,7 +36,7 @@ $ /etc/pam.d/gdm-password
 ```
 
 
-### 0x002 安装VMwareTools
+## 0x002 安装VMwareTools
 
 manifest.txt和VMwareTools-*-tar.gz复制到/tmp目录，提取VMwareTools-*-tar.gz到此目录
 ![](/assets/img/note/2018-02-21-windows-environment/0x002-001.png)

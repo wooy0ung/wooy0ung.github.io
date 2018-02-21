@@ -16,7 +16,7 @@ category:  	note
 <!-- more -->
 
 
-### 0x001 启用内置root用户
+## 0x001 启用内置root用户
 
 设置root用户密码
 ```
@@ -49,7 +49,7 @@ $ sudo nano gdm-password
 重启后输入root账户密码登陆
 
 
-### 0x002 解决py脚本不能attach进程
+## 0x002 解决py脚本不能attach进程
 
 关闭ptrace
 ```
@@ -57,7 +57,7 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
 ```
 
 
-### 0x003 安装python2 & python3
+## 0x003 安装python2 & python3
 
 python2
 ```
@@ -77,14 +77,14 @@ $ sudo apt-get install build-essential libssl-dev libevent-dev libjpeg-dev libxm
 ```
 
 
-### 0x004 安装pwntools
+## 0x004 安装pwntools
 
 ```
 $ sudo pip install pwntools
 ```
 
 
-### 0x005 安装32位运行库
+## 0x005 安装32位运行库
 
 ```
 $ sudo dpkg --add-architecture i386

@@ -21,7 +21,7 @@ category:  	note
 >0x010 安装Reveal8 & 分析iOS UI  
 
 
-### 0x001 解决macOS 10.12.x软件包提示损坏
+## 0x001 解决macOS 10.12.x软件包提示损坏
 
 现象
 ![](/assets/img/note/2018-02-21-macos-environment/0x001-001.png)
@@ -35,7 +35,7 @@ $ sudo spctl --master-disable
 ![](/assets/img/note/2018-02-21-macos-environment/0x001-002.png)
 
 
-### 0x002 macOS 10.12.x登陆bug修复
+## 0x002 macOS 10.12.x登陆bug修复
 
 现象：某天用着用着, 一打开Mac终端提示需要login, 输入管理员密码却是incorrect。
 重启发现密码不对, 不能登入系统。
@@ -73,7 +73,7 @@ mac重启后再resetpassword。但我操作过后不断重启, 同样不适用�
 如果数据不太重要也可以抹除掉重装...这估计是macOS 10.12.x的bug吧, 问了Apple客服也不知道什么原因。
 
 
-### 0x003 安装theos越狱开发环境
+## 0x003 安装theos越狱开发环境
 
 指定Xcode
 ```
@@ -171,7 +171,7 @@ $ make install
 ![](/assets/img/note/2018-02-21-macos-environment/0x003-006.png)
 
 
-### 0x004 iOS app砸壳
+## 0x004 iOS app砸壳
 
 编译
 ```
@@ -231,7 +231,7 @@ dump出8000+的header，砸壳成功
 ![](/assets/img/note/2018-02-21-macos-environment/0x004-003.png)
 
 
-### 0x005 利用lldb调试app
+## 0x005 利用lldb调试app
 
 将本地2222端口转发到iOS的22端口
 ```
@@ -266,7 +266,7 @@ $ lldb
 ![](/assets/img/note/2018-02-21-macos-environment/0x005-001.png)
 
 
-### 0x006 用Voltron增强lldb
+## 0x006 用Voltron增强lldb
 
 安装Voltron
 ```
@@ -297,7 +297,7 @@ $ voltron view register
 ![](/assets/img/note/2018-02-21-macos-environment/0x006-002.png)
 
 
-### 0x007 配置新版theos越狱开发环境
+## 0x007 配置新版theos越狱开发环境
 
 安装打包 & 签名工具
 ```
@@ -343,7 +343,7 @@ Choose a Template (required):
 注意: 新版theos“sudo /opt/theos/bin/bootstrap.sh substrate”这一句已经去除, 也不用到 Cydia 下 copy libsubstrate.dylib, 相比旧版来说简化了安装步骤。
 
 
-### 0x008 配置MonkeyDev集成环境
+## 0x008 配置MonkeyDev集成环境
 
 安装最新版的Xcode9 & theos
 ```
@@ -374,7 +374,7 @@ $ sudo ./md-uninstall
 [无须越狱、自动集成、只需要一个砸壳的应用---MonkeyDev](http://www.alonemonkey.com/2017/07/12/monkeydev-without-jailbreak/)
 
 
-### 0x009 安装wine容器
+## 0x009 安装wine容器
 
 安装wine & winetricks
 ```
@@ -435,7 +435,7 @@ $ control	# 控制面板
 ```
 
 
-### 0x010 安装Reveal8 & 分析iOS UI
+## 0x010 安装Reveal8 & 分析iOS UI
 
 说明:  
 最近在配置MonkeyDev, 因为是 iOS 10.3.2 的机器, 旧版的Reveal都不能正常工作...  
