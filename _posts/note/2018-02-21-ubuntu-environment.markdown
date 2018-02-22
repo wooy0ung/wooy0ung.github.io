@@ -19,7 +19,8 @@ category:  	note
 >0x008 搭建java环境  
 >0x009 搭建shadowsocks服务器  
 >0x010 解决ssh超时自动断开  
->0x011 解决ssh连接vps验证失败  
+>0x011 解决ssh连接vps验证失败
+>0x012 安装ropper  
 
 
 ## 0x001 启用内置root用户
@@ -116,8 +117,8 @@ tty -s && mesg n || true
 ## 0x007 安装Exploit开发利器--PEDA
 
 ```
-$ git clone https://github.com/longld/peda.git ~/peda
-$ echo "source ~/peda/peda.py" >> ~/.gdbinit
+$ git clone https://github.com/longld/peda.git
+$ echo "source ~/toolchain/peda/peda.py" >> ~/.gdbinit
 ```
 
 
@@ -235,3 +236,13 @@ $ ssh-keygen -R VPS_IP
 ```
 
 再次连接询问是否添加公钥, 确认后就能正常连接
+
+
+## 0x012 安装ropper
+
+```
+$ sudo pip install capstone
+$ sudo apt install python-capstone
+$ sudo pip install filebytes
+$ sudo pip install ropper
+```

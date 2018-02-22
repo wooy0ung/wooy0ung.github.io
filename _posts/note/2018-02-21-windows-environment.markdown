@@ -15,7 +15,8 @@ category:  	note
 >0x005 制作Windows XP U盘启动盘  
 >0x006 解决windbg"your debugger is not using the correct symbols"错误  
 <!-- more -->
->0x007 解决Sublime Text 3中文乱码  
+>0x007 解决Sublime Text 3中文乱码
+>0x008 设置java环境变量  
 
 
 ## 0x001 关闭sublime更新提示
@@ -118,3 +119,24 @@ Please install Codecs33 plugin (https://github.com/seanliang/Codecs33/tree/osx).
 ```
 
 继续安装Codecs33, 重启后就正常了
+
+
+## 0x008 设置java环境变量
+
+右击计算机，打开属性->高级系统设置->高级->环境变量
+![](/assets/img/note/2018-02-21-windows-environment/0x008-001.png)
+
+
+```
+# JAVA_HOME
+D:\Program Files\Java\jdk1.8.0_101
+
+# Path添加
+%JAVA_HOME%\bin;%JAVA_HOME%\jre\bin;
+
+# CLASSPATH
+.;%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar;
+```
+
+验证
+![](/assets/img/note/2018-02-21-windows-environment/0x008-002.png)
