@@ -14,10 +14,13 @@ category:  	note
 >0x004 利用FileZilla搭建局域网  
 >0x005 制作Windows XP U盘启动盘  
 >0x006 解决windbg"your debugger is not using the correct symbols"错误  
-<!-- more -->
+<!-- more -->  
 >0x007 解决Sublime Text 3中文乱码
 >0x008 设置java环境变量  
->0x009 安装pip环境  
+>0x009 Visual Studio 2015切换中文语言  
+>0x010 搭建Win10驱动开发环境  
+>0x011 查看Win10激活状态  
+>0x012 Win10一条命令关闭Windows Defender  
 
 
 ## 0x001 关闭sublime更新提示
@@ -96,9 +99,9 @@ SRV*C:\Symbols*http://msdl.microsoft.com/download/symbols
 
 ## 0x007 解决Sublime Text 3中文乱码
 
-ctrl + ~打开控制台, 贴入以下代码
+下载Package Control.sublime-package，放到Installed Packages
 ```
-import urllib.request,os,hashlib; h = '6f4c264a24d933ce70df5dedcf1dcaee' + 'ebe013ee18cced0ef93d5f746d80ef60'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)
+http://sublime.wbond.net/Package%20Control.sublime-package
 ```
 
 Preferences->Package Control
@@ -141,3 +144,145 @@ D:\Program Files\Java\jdk1.8.0_101
 
 验证
 ![](/assets/img/note/2018-02-21-windows-environment/0x008-002.png)
+
+
+0x009 Visual Studio 2015切换中文语言
+
+打开Tools->Options->Environment->International Settings，选择"Get additional languages"
+![](/assets/img/note/2018-02-21-windows-environment/0x009-001.png)
+
+在打开页面中下载中文语言包(将链接中的"en-us"改"zh-cn")
+![](/assets/img/note/2018-02-21-windows-environment/0x009-002.png)
+
+安装重启
+
+
+## 0x010 搭建Win10驱动开发环境
+
+安装Visual Studio 2015 Community
+![](/assets/img/note/2018-02-21-windows-environment/0x010-001.png)
+
+安装SDK(https://docs.microsoft.com/en-us/windows-hardware/drivers/other-wdk-downloads)
+![](/assets/img/note/2018-02-21-windows-environment/0x010-002.png)
+
+安装WDK
+![](/assets/img/note/2018-02-21-windows-environment/0x010-003.png)
+
+安装Win10 x64虚拟机，添加一个串行设备
+```
+# 命名管道
+\\.\pipe\win10_x64
+```
+![](/assets/img/note/2018-02-21-windows-environment/0x010-004.png)
+
+设置Win10虚拟机调试模式
+```
+bcdedit /debug on
+bcdedit /dbgsettings serial debugport:2 baudrate:115200
+```
+
+wdk10调试驱动拷贝到虚拟机
+![](/assets/img/note/2018-02-21-windows-environment/0x010-005.png)
+
+配置vs2015，打开Driver->Test->Configure Devices
+![](/assets/img/note/2018-02-21-windows-environment/0x010-006.png)
+![](/assets/img/note/2018-02-21-windows-environment/0x010-007.png)
+![](/assets/img/note/2018-02-21-windows-environment/0x010-008.png)
+
+下载DebugView(https://docs.microsoft.com/zh-cn/sysinternals/downloads/debugview)
+![](/assets/img/note/2018-02-21-windows-environment/0x010-009.png)
+
+使用DebugView打印内核调试信息
+```
+# 另存为*.reg，添加注册表后重启
+Windows Registry Editor Version 5.00  
+  
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Debug Print Filter]  
+"DEFAULT"=dword:0000000f  
+```
+
+关闭PathGuard与驱动强制签名
+```
+> git clone https://github.com/hfiref0x/UPGDSED.git
+```
+
+管理员权限运行patch.exe，重启用另一个选项启动系统
+![](/assets/img/note/2018-02-21-windows-environment/0x010-010.png)
+
+创建一个驱动工程，删掉inf文件
+![](/assets/img/note/2018-02-21-windows-environment/0x010-011.png)
+![](/assets/img/note/2018-02-21-windows-environment/0x010-012.png)
+
+新建一个.c文件，贴上代码
+```
+#include <ntifs.h>   
+  
+VOID DriverUnload(PDRIVER_OBJECT objDriver)  
+{  
+    // 避免编译器关于未引用参数的警告  
+    UNREFERENCED_PARAMETER(objDriver);  
+  
+    // 什么也不做，只打印一行字符串  
+    KdPrint(("My Dirver is Ending..."));  
+}  
+  
+NTSTATUS DriverEntry(PDRIVER_OBJECT objDriver, PUNICODE_STRING strRegPath)  
+{  
+    // 避免编译器关于未引用参数的警告  
+    UNREFERENCED_PARAMETER(strRegPath);  
+  
+    // 打印一行字符串，并注册驱动卸载函数，以便于驱动卸载  
+    KdPrint(("My  Dirver Is Starting!\r\n"));  
+  
+    objDriver->DriverUnload = DriverUnload;  
+  
+    return STATUS_SUCCESS;  
+}  
+```
+
+设置一下项目属性，编译生成sys
+![](/assets/img/note/2018-02-21-windows-environment/0x010-013.png)
+![](/assets/img/note/2018-02-21-windows-environment/0x010-014.png)
+![](/assets/img/note/2018-02-21-windows-environment/0x010-015.png)
+![](/assets/img/note/2018-02-21-windows-environment/0x010-016.png)
+
+管理员权限运行Dbgview(勾选Capture Kernel)、InstDrvNewx64，装载驱动
+![](/assets/img/note/2018-02-21-windows-environment/0x010-017.png)
+
+成功Dbgview会打印以上信息，若出现以下问题并且Dbgview没有信息显示，重新安装UPGDSED
+![](/assets/img/note/2018-02-21-windows-environment/0x010-018.png)
+
+附加虚拟机内核进行调试，虚拟机断下后，输入g继续运行
+![](/assets/img/note/2018-02-21-windows-environment/0x010-019.png)
+![](/assets/img/note/2018-02-21-windows-environment/0x010-020.png)
+
+
+## 0x011 查看Win10激活状态
+
+查看是否永久激活
+```
+slmgr.vbs -xpr
+```
+
+查看详细信息
+```
+slmgr.vbs -dlv
+```
+
+
+## 0x012 Win10一条命令关闭Windows Defender
+
+cmd输入命令，重启
+```
+reg add “HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender” /v “DisableAntiSpyware” /d 1 /t REG_DWORD /f
+```
+
+重新启用
+```
+定位到HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender
+删除键值DisableAntiSpyware
+```
+
+
+
+An error occurred during the installation of assembly ‘Microsoft.VC90.CRT,publicKeyToken="1fc8b3b9a1e18e3b",version="9.0.30729.6161",processorArchitecture="x86",type="win32"‘. Please refer to Help and Support for more information.
