@@ -9,7 +9,8 @@ category:  	note
 
 >[索引目录]  
 >0x001 启用内置root用户  
->0x002 安装VMwareTools
+>0x002 安装VMwareTools  
+>0x003 安装32位运行库  
 <!-- more -->
 
 
@@ -59,3 +60,10 @@ $ ./vmware-install.pl
 ```
 
 输入yes进行安装，之后全部默认
+
+
+## 0x003 安装32位运行库
+
+```
+
+```

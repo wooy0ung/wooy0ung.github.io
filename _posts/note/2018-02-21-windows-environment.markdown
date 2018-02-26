@@ -14,13 +14,14 @@ category:  	note
 >0x004 利用FileZilla搭建局域网  
 >0x005 制作Windows XP U盘启动盘  
 >0x006 解决windbg"your debugger is not using the correct symbols"错误  
-<!-- more -->  
+<!-- more -->
 >0x007 解决Sublime Text 3中文乱码
 >0x008 设置java环境变量  
 >0x009 Visual Studio 2015切换中文语言  
 >0x010 搭建Win10驱动开发环境  
 >0x011 查看Win10激活状态  
 >0x012 Win10一条命令关闭Windows Defender  
+>0x013 解决Win10运行VC++ 6.0报错  
 
 
 ## 0x001 关闭sublime更新提示
@@ -249,12 +250,14 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT objDriver, PUNICODE_STRING strRegPath)
 管理员权限运行Dbgview(勾选Capture Kernel)、InstDrvNewx64，装载驱动
 ![](/assets/img/note/2018-02-21-windows-environment/0x010-017.png)
 
-成功Dbgview会打印以上信息，若出现以下问题并且Dbgview没有信息显示，重新安装UPGDSED
+成功的话Dbgview会打印以上信息，若出现以下问题并且Dbgview没有信息显示，重新安装UPGDSED
 ![](/assets/img/note/2018-02-21-windows-environment/0x010-018.png)
 
 附加虚拟机内核进行调试，虚拟机断下后，输入g继续运行
 ![](/assets/img/note/2018-02-21-windows-environment/0x010-019.png)
 ![](/assets/img/note/2018-02-21-windows-environment/0x010-020.png)
+![](/assets/img/note/2018-02-21-windows-environment/0x010-021.png)
+![](/assets/img/note/2018-02-21-windows-environment/0x010-022.png)
 
 
 ## 0x011 查看Win10激活状态
@@ -284,5 +287,9 @@ reg add “HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender” /v
 ```
 
 
+## 0x013 解决Win10运行VC++ 6.0报错
 
-An error occurred during the installation of assembly ‘Microsoft.VC90.CRT,publicKeyToken="1fc8b3b9a1e18e3b",version="9.0.30729.6161",processorArchitecture="x86",type="win32"‘. Please refer to Help and Support for more information.
+现象
+![](/assets/img/note/2018-02-21-windows-environment/0x013-001.png)
+
+将另外准备的MSDEV.EXE替换掉.\Microsoft Visual Studio\Common\MSDev98\Bin\MSDEV.EXE
