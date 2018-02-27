@@ -3,7 +3,7 @@ layout:		post
 title:		玩转qemu之环境搭建
 author:		wooy0ung
 tags:		qemu
-category:  	exploit
+category:  	note
 ---
 
 
