@@ -10,6 +10,8 @@ category:  	note
 >[索引目录]  
 >0x001 aarch64  
 >0x002 aarch32  
+>0x003 mips  
+>0x004 arm  
 <!-- more -->
 
 
@@ -209,6 +211,7 @@ sudo qemu-system-aarch64 \
 
 挂载共享文件
 ```
+$ mkdir /nfsroot
 $ mount -t 9p -o trans=virtio,version=9p2000.L hostshare /nfsroot
 ```
 
@@ -220,7 +223,7 @@ $ mount -t 9p -o trans=virtio,version=9p2000.L hostshare /nfsroot
 ![](/assets/img/note/2018-02-27-qemu-environment/0x001-007.png)
 
 
-## 0x001 aarch32
+## 0x002 aarch32
 
 安装qemu和依赖
 ```
@@ -329,3 +332,56 @@ sudo qemu-system-arm \
     -net nic,vlan=0 -net tap,vlan=0,ifname=tap0
 ```
 ![](/assets/img/note/2018-02-27-qemu-environment/0x002-004.png)
+
+
+## 0x003 mips
+
+安装qemu
+```
+# http://download.qemu-project.org/qemu-2.8.0.tar.xz
+$ tar -xf qemu-2.8.0.tar.xz
+
+$ cd qemu-2.8.0
+$ mkdir build
+$ cd build
+$ ../configure --target-list=mips-softmmu,mips-linux-user --audio-drv-list=alsa --enable-virtfs
+$ make -j8
+$ sudo make install
+```
+
+下载debian mips镜像
+```
+# https://people.debian.org/~aurel32/qemu/mips/
+# debian_squeeze_mips_standard.qcow2
+# vmlinux-2.6.32-5-4kc-malta
+```
+
+配置网络 & 启动
+```
+# run.sh
+sudo qemu-system-mips \
+    -M malta \
+    -kernel vmlinux-2.6.32-5-4kc-malta \
+    -hda debian_squeeze_mips_standard.qcow2 \
+    -m 1024M \
+    -append "root=/dev/sda1 console=ttyAMA0" \
+    -nographic \
+    -net nic,vlan=0,macaddr=00:16:3e:00:00:01 \
+    -net tap,vlan=0,ifname=tap0
+```
+![](/assets/img/note/2018-02-27-qemu-environment/0x003-001.png)
+
+
+## 0x004 arm
+
+```
+qemu-system-arm -kernel kernel-qemu-4.4.34-jessie \
+    -cpu arm1176 \
+    -m 256 \
+    -M versatilepb \
+    -serial stdio \
+    -append "root=/dev/sda2 rootfstype=ext4 rw" \
+    -drive format=raw,file=2017-08-16-raspbian-stretch-lite.img \
+    -redir tcp:5022::22 \
+    -redir tcp:2333::2333
+```
