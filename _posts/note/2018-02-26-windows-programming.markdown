@@ -108,7 +108,7 @@ INT main(INT argc, CHAR* argv[])
 
 	//准备卸载之前注入的Dll
 	DWORD dwHandle, dwID;
-	LPVOID pFunc = GetModuleHandleA;	//获得在远程县城中被注入的Dll句柄
+	LPVOID pFunc = GetModuleHandleA;
 	HANDLE hThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)pFunc, lpRemoteBuf, 0, &dwID);
 	WaitForSingleObject(hThread, INFINITE);
 	GetExitCodeThread(hThread, &dwHandle);
