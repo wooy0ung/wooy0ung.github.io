@@ -333,6 +333,11 @@ sudo qemu-system-arm \
 ```
 ![](/assets/img/note/2018-02-27-qemu-environment/0x002-004.png)
 
+nfs挂载
+```
+$ mount -t nfs -o nolock 192.168.1.128:/nfsroot /mnt
+```
+
 
 ## 0x003 mips
 
@@ -374,14 +379,40 @@ sudo qemu-system-mips \
 
 ## 0x004 arm
 
+下载启动镜像
 ```
-qemu-system-arm -kernel kernel-qemu-4.4.34-jessie \
+# https://www.raspberrypi.org/downloads/raspbian/
+# 2017-11-29-raspbian-stretch-lite.img
+
+# https://github.com/dhruvvyas90/qemu-rpi-kernel
+# kernel-qemu-4.4.34-jessie
+```
+
+启动qemu
+```
+qemu-system-arm \
+    -kernel kernel-qemu-4.4.34-jessie \
     -cpu arm1176 \
     -m 256 \
     -M versatilepb \
     -serial stdio \
-    -append "root=/dev/sda2 rootfstype=ext4 rw" \
-    -drive format=raw,file=2017-08-16-raspbian-stretch-lite.img \
-    -redir tcp:5022::22 \
-    -redir tcp:2333::2333
+    -append "root=/dev/sda2 rootfstype=ext4 rw console=ttyAMA0" \
+    -drive format=raw,file=2017-11-29-raspbian-stretch-lite.img \
+    -net nic,vlan=0 -net tap,vlan=0,ifname=tap0
 ```
+![](/assets/img/note/2018-02-27-qemu-environment/0x004-001.png)
+
+修改raspberry的/etc/network/interfaces文件
+```
+$ sudo nano /etc/network/interfaces
+
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+address 192.168.1.24
+netmask 255.255.255.0
+gateway 192.168.1.2
+```
+
+重启

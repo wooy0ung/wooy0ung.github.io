@@ -22,6 +22,8 @@ category:  	note
 >0x011 解决ssh连接vps验证失败
 >0x012 安装ropper  
 >0x013 tar解压命令详细参数  
+>0x014 配置arm调试器 & gef脚本  
+>0x015 解决Ubuntu 16.04.3虚拟机开机开机蓝屏  
 
 
 ## 0x001 启用内置root用户
@@ -321,3 +323,85 @@ $ unrar e file.rar //解压rar
 
 $ unzip file.zip //解压zip
 ```
+
+
+## 0x014 配置arm调试器 & gef脚本
+
+安装交叉编译环境
+```
+$ sudo apt install gcc-5-arm-linux-gnueabi
+```
+
+安装依赖
+```
+$ sudo apt install gdb-multiarch
+```
+
+进入目录./gdb-7.11.1/gdb/gdbserver
+```
+$ mkdir build
+$ CC="arm-linux-gnueabi-gcc-5" CXX="arm-linux-gnueabi-g++-5" ./configure --target=arm-linux-gnueabi --host="arm-linux-gnueabi" --prefix="/root/toolchain/gdb/gdb-7.11.1/gdb/gdbserver/build"
+$ make install
+```
+
+在build目录找到编译好的gdbserver
+```
+$ file arm-linux-gnueabi-gdbserver
+arm-linux-gnueabi-gdbserver: ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.3, for GNU/Linux 3.2.0, BuildID[sha1]=b65f702a4d50f352a03e2346724bf0f888cd93ea, not stripped
+```
+
+安装gef增强脚本
+```
+$ wget -O ~/.gdbinit-gef.py -q https://github.com/hugsy/gef/raw/master/gef.py
+$ echo source ~/.gdbinit-gef.py >> ~/.gdbinit
+```
+
+修复依赖
+```
+$ pip3 install capstone
+$ pip3 install unicorn
+$ pip3 install ropper
+$ pip3 install retdec-python
+```
+
+修复keystone-engine
+```
+$ sudo apt-get install cmake
+$ mkdir build
+$ cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DLLVM_TARGETS_TO_BUILD="AArch64;X86" -G "Unix Makefiles" ..
+$ sudo make install
+
+$ sudo ldconfig
+$ pip3 install keystone-engine
+```
+![](/assets/img/note/2018-02-21-ubuntu-environment/0x014-001.png)
+
+启动gdbserver
+```
+$ scp -P 5022 hello pi@127.0.0.1:/tmp
+$ scp -P 5022 arm-linux-gnueabi-gdbserver pi@127.0.0.1:/tmp
+$ ./arm-linux-gnueabi-gdbserver 0.0.0.0:2333 hello
+Process hello created; pid = 702
+Listening on port 2333
+```
+
+启动gdb
+```
+$ gdb-multiarch
+$ set architecture arm
+$ gef-remote –q 127.0.0.1:2333
+```
+
+
+## 0x015 解决Ubuntu 16.04.3虚拟机开机开机蓝屏
+
+现象
+![](/assets/img/note/2018-02-21-ubuntu-environment/0x015-001.png)
+
+编辑.vmx文件，添加
+```
+cpuid.1.eax = "0000:0000:0000:0001:0000:0110:1010:0101"
+```
+
+重启

@@ -22,6 +22,7 @@ category:  	note
 >0x011 查看Win10激活状态  
 >0x012 Win10一条命令关闭Windows Defender  
 >0x013 解决Win10运行VC++ 6.0报错  
+>0x014 Win10关闭自动更新 & 清除更新包  
 
 
 ## 0x001 关闭sublime更新提示
@@ -293,3 +294,12 @@ reg add “HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender” /v
 ![](/assets/img/note/2018-02-21-windows-environment/0x013-001.png)
 
 将另外准备的MSDEV.EXE替换掉.\Microsoft Visual Studio\Common\MSDev98\Bin\MSDEV.EXE
+
+
+### 0x014 Win10关闭自动更新 & 清除更新包
+
+Win + R打开services.msc，找到Windows Update禁用掉
+![](/assets/img/note/2018-02-21-windows-environment/0x014-001.png)
+
+打开磁盘清理->清理系统文件
+![](/assets/img/note/2018-02-21-windows-environment/0x014-002.png)
