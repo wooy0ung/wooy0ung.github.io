@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      胡乱做做的部分pwn题
+title:      随便做做的部分pwn题
 author:     wooy0ung
 tags: 		pwn
 category:  	writeup
