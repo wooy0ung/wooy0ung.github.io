@@ -17,48 +17,43 @@ category:  	writeup
 <!-- more -->
 
 
-### 0x01 前期准备
+### 0x001 前期准备
 
 1. 具有公网ip的vps
 2. ubuntu 16.04 LST
 3. docker
 
 
-### 0x02 docker安装&配置
+### 0x002 docker安装&配置
 
 ssh连接上vps
-
 ```
 $ root@vps_ip
 ```
 
 安装docker
-
 ```
 $ sudo apt-get update
 $ sudo apt-get install docker.io
 ```
 
 启动docker
-
 ```
 $ sudo service docker start
 ```
 
 测试运行
-
 ```
 $ docker run hello-world
 ```
 
 显示这样是正常的
+![](/assets/img/writeup/2018-01-16-ctf-pwn-docker/0x001.png)
 
-![](/assets/img/writeup/normal/2018-01-16-ctf-pwn-docker/0x01.png)
 
-### 0x03 配置Dockerfile
+### 0x003 配置Dockerfile
 
 准备题目源码, 保存为pwn.c
-
 ```
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,25 +77,21 @@ int main()
 ```
 
 准备flag
-
 ```
 flag{2333333333333333333}
 ```
 
 编译
-
 ```
 $ gcc pwn.c -o pwn
 ```
 
 关闭ASLR
-
 ```
 $ sudo bash -c 'echo 0 > /proc/sys/kernel/randomize_va_space'
 ```
 
 准备Dockerfile
-
 ```
 FROM ubuntu
 MAINTAINER wooy0ung
@@ -128,38 +119,31 @@ EXPOSE 4444
 ```
 
 建立docker镜像
-
 ```
 $ docker build -t pwn .
 ```
-
-![](/assets/img/writeup/normal/2018-01-16-ctf-pwn-docker/0x02.png)
+![](/assets/img/writeup/2018-01-16-ctf-pwn-docker/0x002.png)
 
 运行
-
 ```
 $ docker run -d -p 0.0.0.0:10001:4444 -t pwn
 ```
 
 nc上去
+![](/assets/img/writeup/2018-01-16-ctf-pwn-docker/0x003.png)
 
-![](/assets/img/writeup/normal/2018-01-16-ctf-pwn-docker/0x02.png)
 
-
-### 0x04 拉取libc.so
+### 0x004 拉取libc.so
 
 运行docker镜像
-
 ```
 $ docker run -it pwn /bin/bash
 ```
-
-![](/assets/img/writeup/normal/2018-01-16-ctf-pwn-docker/0x04.png)
+![](/assets/img/writeup/2018-01-16-ctf-pwn-docker/0x004.png)
 
 copy libc.so 到主机, 再scp传回本地
-
 ```
 $ docker cp ddb4a858df6c:/tmp/libc.so.6 .
 ```
 
-![](/assets/img/writeup/normal/2018-01-16-ctf-pwn-docker/0x05.png)
+![](/assets/img/writeup/2018-01-16-ctf-pwn-docker/0x005.png)

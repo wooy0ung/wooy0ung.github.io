@@ -1,0 +1,34 @@
+---
+layout:     post
+title:      hackme.tw misc部分writeup
+author:     wooy0ung
+tags: 		misc
+category:  	writeup
+---
+
+
+>[索引目录]  
+>0x001 meow  
+<!-- more -->
+
+
+## 0x001 meow
+
+>Problem Description:  
+>Pusheen is cute!  
+>  
+>Download:  
+>svn checkout https://github.com/wooy0ung/ctfs/trunk/  
+>write-ups-platform/hackme.tw/Misc/meow_50pt  
+
+binwalk跑一下
+![](/assets/img/writeup/2017-10-24-hackme.tw-meow/0x001-001.png)
+
+foremost分离一下文件, 得到png和加密的zip
+![](/assets/img/writeup/2017-10-24-hackme.tw-meow/0x001-002.png)
+
+将得到的png zip压缩一下, 发现CRC32一致, 明文攻击
+![](/assets/img/writeup/2017-10-24-hackme.tw-meow/0x001-003.png)
+
+getflag~
+![](/assets/img/writeup/2017-10-24-hackme.tw-meow/0x001-004.png)
