@@ -16,22 +16,22 @@ category:  	writeup
 
 拿到 ipa 包, 先安装到 iOS
 
-![](/assets/img/writeup/re/2017-08-31-alicrackme-2015-ios-level1/0x00.png)
+![](/assets/img/writeup/2017-08-31-alicrackme-2015-ios-level1/0x00.png)
 
 常规的密码校验程序, 解包后将可执行文件拖到 IDA 分析, 定位到 onClick 方法
 
-![](/assets/img/writeup/re/2017-08-31-alicrackme-2015-ios-level1/0x01.png)
+![](/assets/img/writeup/2017-08-31-alicrackme-2015-ios-level1/0x01.png)
 
 这里的 _objc_msgSend 方法控制程序从文件读取 source data, 生成特定 string, 再与输入 string 判断是否相同
 
-![](/assets/img/writeup/re/2017-08-31-alicrackme-2015-ios-level1/0x02.png)
+![](/assets/img/writeup/2017-08-31-alicrackme-2015-ios-level1/0x02.png)
 
 
 ### 0x01 crack
 
 直接 lldb attach 上去
 
-![](/assets/img/writeup/re/2017-08-31-alicrackme-2015-ios-level1/0x03.png)
+![](/assets/img/writeup/2017-08-31-alicrackme-2015-ios-level1/0x03.png)
 
 查找 entry point
 
@@ -39,7 +39,7 @@ category:  	writeup
 (lldb) list image -o -f
 ```
 
-![](/assets/img/writeup/re/2017-08-31-alicrackme-2015-ios-level1/0x04.png)
+![](/assets/img/writeup/2017-08-31-alicrackme-2015-ios-level1/0x04.png)
 
 在第一个 _objc_msgSend 下断, 输入任意密码(如:11111111)后点击"进入", 断点断下
 
@@ -50,8 +50,8 @@ category:  	writeup
 
 跟下去, 这里返回了输入的 string
 
-![](/assets/img/writeup/re/2017-08-31-alicrackme-2015-ios-level1/0x05.png)
+![](/assets/img/writeup/2017-08-31-alicrackme-2015-ios-level1/0x05.png)
 
 继续单步下去, 最后一个 _objc_msgSend 返回了 flag, 将 X0 寄存器打印出来, getflag~
 
-![](/assets/img/writeup/re/2017-08-31-alicrackme-2015-ios-level1/0x06.png)
+![](/assets/img/writeup/2017-08-31-alicrackme-2015-ios-level1/0x06.png)

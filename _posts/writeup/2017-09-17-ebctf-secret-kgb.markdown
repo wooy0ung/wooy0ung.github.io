@@ -10,7 +10,7 @@ category:  	writeup
 >Problem Description:  
 >During my time at KGB I learned how to hide all the stuff from alpha-dog. But damn it, I somehow lost some of the most important files...  
 >感觉这题不是RE, 更像是隐写...
-![](/assets/img/writeup/re/2017-09-17-ebctf-secret-kgb/0x00.png)
+![](/assets/img/writeup/2017-09-17-ebctf-secret-kgb/0x00.png)
 <!-- more -->
 
 
@@ -24,7 +24,7 @@ $ mount ~/secretArchive /mnt
 
 打开有一大堆 ASCII 的文件, 写个脚本输出一下, 没有什么有用的数据
 
-![](/assets/img/writeup/re/2017-09-17-ebctf-secret-kgb/0x01.png)
+![](/assets/img/writeup/2017-09-17-ebctf-secret-kgb/0x01.png)
 
 ```
 path = 'sec/'
@@ -43,11 +43,11 @@ f.close()
 $ extundelete --restore-all ./secretArchive
 ```
 
-![](/assets/img/writeup/re/2017-09-17-ebctf-secret-kgb/0x02.png)
+![](/assets/img/writeup/2017-09-17-ebctf-secret-kgb/0x02.png)
 
 恢复的文件里有一个 .secret31337 是 KGB 格式
 
-![](/assets/img/writeup/re/2017-09-17-ebctf-secret-kgb/0x03.png)
+![](/assets/img/writeup/2017-09-17-ebctf-secret-kgb/0x03.png)
 
 直接解密, getflag~
 
@@ -55,4 +55,4 @@ $ extundelete --restore-all ./secretArchive
 $ kgb .secret31337
 ```
 
-![](/assets/img/writeup/re/2017-09-17-ebctf-secret-kgb/0x04.png)
+![](/assets/img/writeup/2017-09-17-ebctf-secret-kgb/0x04.png)

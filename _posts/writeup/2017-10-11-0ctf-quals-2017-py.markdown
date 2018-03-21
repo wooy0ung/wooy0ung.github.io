@@ -29,7 +29,7 @@ $ sudo python setup.py install
 
 直接反编译报错
 
-![](/assets/img/writeup/re/2017-10-11-0ctf-quals-2017-py/0x00.png)
+![](/assets/img/writeup/2017-10-11-0ctf-quals-2017-py/0x00.png)
 
 
 ### 0x01 dump pyc
@@ -98,7 +98,7 @@ show_file(sys.argv[1])
 $ python pycdump.py test.pyc
 ```
 
-![](/assets/img/writeup/re/2017-10-11-0ctf-quals-2017-py/0x01.png)
+![](/assets/img/writeup/2017-10-11-0ctf-quals-2017-py/0x01.png)
 
 到这里已经能正常反编译pyc文件了
 
@@ -107,7 +107,7 @@ $ python pycdump.py test.pyc
 
 反编译crypt.pyc, 发现还是报错, 猜测代码被混淆过
 
-![](/assets/img/writeup/re/2017-10-11-0ctf-quals-2017-py/0x02.png)
+![](/assets/img/writeup/2017-10-11-0ctf-quals-2017-py/0x02.png)
 
 注释掉pycdump.py的dis.disassemble(code)一句, 再次反编译
 
@@ -262,4 +262,4 @@ print decrypt(i)
 
 get flag~
 
-![](/assets/img/writeup/re/2017-10-11-0ctf-quals-2017-py/0x03.png)
+![](/assets/img/writeup/2017-10-11-0ctf-quals-2017-py/0x03.png)
