@@ -10,6 +10,7 @@ category:  	note
 >[索引目录]  
 >0x001 动态调试apk——android studio  
 >0x002 动态调试apk——jeb2  
+>0x003 windows安装android studio以及配置sdk  
 <!-- more -->
 
 
@@ -95,3 +96,14 @@ $ ./jeb_macos.sh
 
 ![](/assets/img/note/2018-02-21-ubuntu-environment/0x002-002.png)
 ![](/assets/img/note/2018-02-21-ubuntu-environment/0x002-003.png)
+
+
+## 0x003 windows安装android studio以及配置sdk
+
+现象：首次启动android studio提示无法下载sdk
+
+解决：设置http proxy
+```
+网址：mirrors.neusoft.edu.cn
+端口：80
+```

@@ -12,6 +12,7 @@ category:  	note
 >0x002 安装Microsoft Visual C++ Compiler for Python 2.7  
 >0x003 解决Cannot open include file: 'pcap.h'  
 >0x004 解决ImportError: No module named setuptools  
+>0x005 解决pip list警告  
 <!-- more -->  
 
 
@@ -68,3 +69,17 @@ ImportError: No module named setuptools
 ```
 
 安装setuptools-0.6c11.win32-py2.7.exe
+
+
+## 0x005 解决pip list警告
+
+现象
+```
+DEPRECATION: The default format will switch to columns in the future. You can use --format=(legacy|columns) (or define a format=(legacy|columns) in your pip.conf under the [list] section) to disable this warning
+```
+
+pip >= 9.0.1，创建C:\Users\wooy0\pip\pip.ini，添加
+```
+[list] 
+format=columns
+```

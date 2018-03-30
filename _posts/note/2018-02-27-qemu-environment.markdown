@@ -12,6 +12,8 @@ category:  	note
 >0x002 aarch32  
 >0x003 mips  
 >0x004 arm  
+>0x005 x86  
+>0x006 x86-k2.6  
 <!-- more -->
 
 
@@ -416,3 +418,193 @@ gateway 192.168.1.2
 ```
 
 重启
+
+
+## 0x005 x86
+
+安装开发包
+```
+$ apt install linux-libc-dev:i386
+```
+
+编译linux内核
+```
+# make.sh
+#!/bin/bash
+make O=out_x86 i386_defconfig
+make O=out_x86 menuconfig
+make O=out_x86 bzImage -j8
+```
+
+在kernel配置支持ramdisk的启动方式
+```
+$ chmod a+x make.sh
+$ ./make.sh
+
+General setup  --->
+    ----> [*] Initial RAM filesystem and RAM disk (initramfs/initrd) support
+Device Drivers  --->
+    [*] Block devices  --->
+        <*> RAM block device support
+        (65536) Default RAM disk size (kbytes)
+```
+
+制作根文件系统
+```
+$ tar -xjvf busybox-1.24.2.tar.bz2
+$ make menuconfig
+
+Busybox Settings  --->
+    Build Options  --->
+        [*] Build BusyBox as a static binary (no shared libs)
+        (-m32 -march=i386 -mtune=i386) Additional CFLAGS
+        (-m32) Additional LDFLAGS
+
+$ make -j4
+$ make install
+```
+
+制作ramdisk镜像
+```
+$ tar -xzvf x86_rootfs.tar.gz
+
+# mk_ramdisk.sh
+#!/bin/bash
+sudo rm -rf rootfs
+sudo rm -rf tmpfs
+sudo rm -rf ramdisk*
+sudo mkdir rootfs
+sudo cp ../busybox-1.24.2/_install/*  rootfs/ -raf
+sudo mkdir -p rootfs/proc/
+sudo mkdir -p rootfs/sys/
+sudo mkdir -p rootfs/tmp/
+sudo mkdir -p rootfs/root/
+sudo mkdir -p rootfs/var/
+sudo mkdir -p rootfs/mnt/
+sudo cp etc rootfs/ -arf
+sudo mkdir -p rootfs/lib
+sudo cp -arf /lib/i386-linux-gnu/* rootfs/lib/
+sudo rm rootfs/lib/*.a
+sudo strip rootfs/lib/*
+sudo mkdir -p rootfs/dev/
+sudo mknod rootfs/dev/tty1 c 4 1
+sudo mknod rootfs/dev/tty2 c 4 2
+sudo mknod rootfs/dev/tty3 c 4 3
+sudo mknod rootfs/dev/tty4 c 4 4
+sudo mknod rootfs/dev/console c 5 1
+sudo mknod rootfs/dev/null c 1 3
+sudo dd if=/dev/zero of=ramdisk bs=1M count=32
+sudo mkfs.ext4 -F ramdisk
+sudo mkdir -p tmpfs
+sudo mount -t ext4 ramdisk ./tmpfs/  -o loop
+sudo cp -raf rootfs/*  tmpfs/
+sudo umount tmpfs
+sudo gzip --best -c ramdisk > ramdisk.gz
+
+$ chmod a+x ./mk_ramdisk.sh
+$ ./mk_ramdisk.sh
+```
+
+启动qemu
+```
+# run.sh
+sudo qemu-system-i386 \
+    -smp 2 \
+    -m 1024M \
+    -kernel ./bzImage \
+    -nographic \
+    -append "root=/dev/ram0 rw rootfstype=ext4 console=ttyS0 init=/linuxrc" \
+    -initrd ./rootfs/ramdisk.gz \
+    -net nic,vlan=0 -net tap,vlan=0,ifname=tap0
+```
+
+
+## 0x006 x86-k2.6
+
+错误1
+```
+gcc: error: elf_i386: No such file or directory
+make[2]: *** [arch/x86/vdso/vdso32-int80.so.dbg] Error 1
+```
+
+解决
+```
+VDSO_LDFLAGS_vdso.lds = -m elf_x86_64 -Wl,-soname=linux-vdso.so.1 \
+                -Wl,-z,max-page-size=4096 -Wl,-z,common-page-size=4096  # “-m elf_x86_64”替换为“-m64”
+
+VDSO_LDFLAGS_vdso32.lds = -m elf_i386 -Wl,-soname=linux-gate.so.1       # “-m elf_i386”替换为“-m32”
+```
+
+错误2
+```
+drivers/net/igbvf/igbvf.h:128:15: error: duplicate member ‘page’
+make[3]: *** [drivers/net/igbvf/ethtool.o] Error 1
+make[2]: *** [drivers/net/igbvf] Error 2
+make[1]: *** [drivers/net] Error 2
+make: *** [drivers] Error 2
+```
+
+解决
+```
+struct {
+            struct page *page;  # “*page”替换为“*_page”
+            u64 page_dma;
+            unsigned int page_offset;
+        };
+```
+
+增加syscall，在syscall table中添加信息
+```
+# arch/x86/kernel/syscall_table_32.S
+.long sys_muhe_test
+.long sys_hello
+```
+
+定义syscall的宏
+```
+# arch/x86/include/asm/unistd_32.h
+#define __NR_muhe_test      337
+#define __NR_hello      338
+
+#ifdef __KERNEL__
+
+#define NR_syscalls 339
+```
+
+添加函数定义
+```
+# include/linux/syscalls.h
+asmlinkage long sys_muhe_test(int arg0);
+asmlinkage long sys_hello(void);
+```
+
+编写syscall代码，新建目录放自定义syscall的代码
+```
+$ mkdir muhe_test
+$ cd muhe_test
+$ nano muhe_test.c
+
+#include <linux/kernel.h>
+asmlinkage long sys_muhe_test(int arg0){
+    printk("I am syscall");
+    printk("syscall arg %d",arg0);
+    return ((long)arg0);
+}
+asmlinkage long sys_hello(void){
+    printk("hello my kernel worldn");
+    return 0;
+}
+
+$ nano Makefile
+obj-y := muhe_test.o
+```
+
+修改Makefile
+```
+core-y        += kernel/ mm/ fs/ ipc/ security/ crypto/ block/ muhe_test/
+```
+
+编译
+```
+make -j2
+```
