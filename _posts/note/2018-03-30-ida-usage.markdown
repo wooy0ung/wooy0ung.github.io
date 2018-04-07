@@ -1,0 +1,25 @@
+---
+layout:		post
+title:		IDA使用记录篇
+author:		wooy0ung
+tags:		
+category:  	note
+---
+
+
+>[索引目录]  
+>0x001 ida创建结构体  
+<!-- more -->
+
+
+## 0x001 ida创建结构体
+
+```
+1.导入结构体文件
+
+2.右键，定义结构体类型，之后就可以用 alt + q ，将变量为结构体类型
+
+（第一次不能直接 alt + q，应该 shift+F9 -> insert -> 点击 Add standard structure，将导入的结构体添加到结构体类型，然后既可以 alt + q 了。）
+
+3.快捷键t， 解析变量为结构体成员
+```

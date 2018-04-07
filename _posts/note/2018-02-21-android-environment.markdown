@@ -100,10 +100,17 @@ $ ./jeb_macos.sh
 
 ## 0x003 windows安装android studio以及配置sdk
 
-现象：首次启动android studio提示无法下载sdk
+问题：首次启动android studio提示无法下载sdk
 
 解决：设置http proxy
 ```
 网址：mirrors.neusoft.edu.cn
 端口：80
+```
+
+问题: Intel x86 Emulator Accelerator(HAXM installer)不兼容
+
+解决: 下载haxm-windows_v7_0_0.zip，解压安装intelhaxm-android.exe
+```
+https://software.intel.com/en-us/articles/intel-hardware-accelerated-execution-manager-intel-haxm
 ```

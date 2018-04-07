@@ -13,6 +13,13 @@ category:  	note
 >0x003 peda  
 >0x004 windbg  
 >0x005 objdump  
+>0x006 objcopy  
+>0x007 strace  
+>0x008 ltrace  
+>0x009 readelf  
+>0x010 ftrace  
+>0x011 gcc  
+>0x012 quenya  
 <!-- more -->
 
 
@@ -1299,3 +1306,143 @@ readelf -d <object>
 # 查看ELF文件
 readelf -h <object>
 ```
+
+
+## 0x010 ftrace
+
+```
+$ gcc ftrace.c -o ftrace
+$ ftrace -s <file>
+$ ftrace -S <file>
+
+# 删除符号表
+$ gcc -nostdlib test2.c -o <file>    # 不使用libc进行链接
+$ strip <file>    # 删除符号表
+```
+
+
+## 0x011 gcc
+
+```
+# 源代码编译预处理。在预处理过程中，对源代码文件中的文件包含(include)、预编译语句(如宏定义define等)进行分析
+gcc -E hello.c -o hello.i
+
+# 经过编译器，生成汇编代码
+gcc -S hello.i -o hello.s
+
+# 经过汇编器，生成目标代码
+gcc -c hello.s -o hello.o
+
+# 经过链接器，生成可执行程序：在链接阶段，所有的目标文件被安排在可执行程序中的恰当的位置，同时，该程序所调用到的库函数也从各自所在的档案库中连到合适的地方
+gcc hello.o -o hello
+# 链接多个文件
+gcc -nostdlib -m32 obj1.o obj2.o -o relocated
+
+# 也可一步生成.o文件
+gcc -c hello.c
+
+参数:
+-m32  # 编译x86程序
+-fomit-frame-pointer  # 混淆程序入口
+-nostdlib # 不链接libc
+```
+
+
+## 0x012 quenya
+
+修改源文件
+```
+# 打开/root/toolchain/quenya/libptrace/configure，注释掉
+#ac_config_files="$ac_config_files tests/linux/Makefile"
+
+#ac_config_files="$ac_config_files tests/windows/Makefile"
+
+#ac_config_files="$ac_config_files tests/windows/psapi/Makefile"
+
+#ac_config_files="$ac_config_files tests/windows/psapiutil/Makefile"
+
+# 然后
+$ ./configure
+
+# 打开/root/toolchain/quenya/libptrace/Makefile，注释掉
+#am__append_1 = tests/linux
+#am__append_2 = tests/windows
+
+#DIST_SUBDIRS = src tests/linux tests/windows
+
+# 然后
+$ make
+
+# 打开/root/toolchain/quenya/us_exec/Makefile，添加-m32参数，然后
+$ make
+
+# 进入/root/toolchain/quenya/libdasm-1.5，然后
+$ make
+
+# 回到/root/toolchain/quenya
+$ make
+
+$ ./quenya
+```
+
+编译完成
+![](/assets/img/note/2018-03-01-linux-binary-tools/0x012-001.png)
+
+编译测试程序
+```
+#include <sys/syscall.h>
+
+int _write(int fd,void *buf,int count)
+{
+  long ret;
+  
+  __asm__ __volatile__ ("pushl %%ebx\n\t"
+  "movl %%esi,%%ebx\n\t"
+  "int $0x80\n\t""popl %%ebx":"=a" (ret)
+        :"0" (SYS_write),"S" ((long) fd),
+  "c" ((long) buf),"d" ((long) count));
+  if(ret>=0)
+  {
+    return (int) ret;
+  }
+  return -1;
+}
+
+int evil_puts(void)
+{
+  _write(1,"HAHA puts() has been hijacked!\n",31);
+}
+
+$ gcc -c evil_puts.c
+
+#include <stdio.h>
+
+int main()
+{
+  puts("Hello World!\n");
+}
+
+$ gcc hello.c -o hello
+```
+
+文件注入并重定位
+```
+[Quenya v0.1@ubuntu] reloc evil_puts.o hello
+0x08048628  addr: 0x8048616
+0x080485c8 _write addr: 0x8048622
+0x080485c8  addr: 0x8048693
+0x080485c8  addr: 0x80486bb
+Injection/Relocation succeeded
+```
+
+重写全局偏移表条目
+```
+[Quenya v0.1@ubuntu] hijack binary hello evil_puts puts
+Attempting to hijack function: puts
+Modifying GOT entry for puts
+Succesfully hijacked function: puts
+Commiting changes into executable file
+```
+
+成功hijack
+![](/assets/img/note/2018-03-01-linux-binary-tools/0x012-002.png)

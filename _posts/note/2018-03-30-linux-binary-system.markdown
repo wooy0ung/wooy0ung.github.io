@@ -13,6 +13,8 @@ category:  	note
 >0x003 ECFS(扩展核心文件快照)  
 >0x004 ELF文件类型  
 >0x005 ELF头部结构  
+>0x006 text段 & data段布局结构  
+>0x007 重定位隐式加数  
 <!-- more -->
 
 
@@ -97,3 +99,92 @@ e_shentsize		节头大小
 e_shnum			number of program headers
 e_shstrndx		字符串表段索引
 ```
+
+
+## 0x006 text段 & data段布局结构
+
+text段
+```
+[.text]: 程序代码
+[.rodata]: 只读数据
+[.hash]: 符号散列表
+[.dynsym]: 共享目标文件符号
+[.dynstr]: 共享目标文件符号名称
+[.plt]: 过程链接表
+[.rel.got]: G.O.T重定位数据
+```
+
+data段布局
+```
+[.data]: 全局的初始化变量
+[.dynamic:] 动态链接结构和对象
+[.got.plt]: 全局偏移表
+[.bss]: 全局未初始化变量
+```
+
+
+## 0x007 重定位隐式加数
+
+重定位前
+```
+# 调用指令e8 fc ff ff ff(-4 <==> -(sizeof(uint32_t)))保存了隐式加数，call 7表示重定位的偏移量
+root@ubuntu:~/workspace/elf# objdump -d obj1.o
+
+obj1.o：     文件格式 elf32-i386
+
+
+Disassembly of section .text:
+
+00000000 <_start>:
+   0:   55                      push   %ebp
+   1:   89 e5                   mov    %esp,%ebp
+   3:   83 ec 08                sub    $0x8,%esp
+   6:   e8 fc ff ff ff          call   7 <_start+0x7>
+   b:   90                      nop
+   c:   c9                      leave  
+   d:   c3                      ret    
+
+root@ubuntu:~/workspace/elf# readelf -r obj1.o
+
+重定位节 '.rel.text' 位于偏移量 0x164 含有 1 个条目：
+ 偏移量     信息    类型              符号值      符号名称
+00000007  00000902 R_386_PC32        00000000   foo
+
+重定位节 '.rel.eh_frame' 位于偏移量 0x16c 含有 1 个条目：
+ 偏移量     信息    类型              符号值      符号名称
+00000020  00000202 R_386_PC32        00000000   .text
+```
+
+重定位
+```
+root@ubuntu:~/workspace/elf/obj# gcc -nostdlib -m32 obj1.o obj2.o -o relocated
+
+root@ubuntu:~/workspace/elf/obj# objdump -d relocated
+
+relocated：     文件格式 elf32-i386
+
+
+Disassembly of section .text:
+
+080480d8 <_start>:
+ 80480d8:   55                      push   %ebp
+ 80480d9:   89 e5                   mov    %esp,%ebp
+ 80480db:   83 ec 08                sub    $0x8,%esp
+ 80480de:   e8 03 00 00 00          call   80480e6 <foo>
+ 80480e3:   90                      nop
+ 80480e4:   c9                      leave  
+ 80480e5:   c3                      ret    
+
+080480e6 <foo>:
+ 80480e6:   55                      push   %ebp
+ 80480e7:   89 e5                   mov    %esp,%ebp
+ 80480e9:   90                      nop
+ 80480ea:   5d                      pop    %ebp
+ 80480eb:   c3                      ret
+```
+
+
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+
+87   8c    8e   b5

