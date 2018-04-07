@@ -8,9 +8,9 @@ category:  	writeup
 
 
 >[索引目录]  
->0x001 silent  
->0x002 silent2  
->0x003 core  
+>0x001 silent(fastbin attack)  
+>0x002 silent2(unlink)  
+>0x003 core(rop)  
 <!-- more -->
 
 
