@@ -26,6 +26,7 @@ category:  	note
 >0x015 关闭Firefox自动更新  
 >0x016 Windows安装binwalk  
 >0x017 Windows安装pip命令  
+>0x018 VMWare14解锁macOS安装限制  
 
 
 ## 0x001 关闭sublime更新提示
@@ -379,3 +380,12 @@ if __name__ == "__main__":
 ```
 C:\python27-x64\Scripts
 ```
+
+
+## 0x018 VMWare14解锁macOS安装限制
+
+打开任务管理器：win+R，输入 services.msc，将关于 VMware 的服务全部停止运行
+![](/assets/img/note/2018-02-21-windows-environment/0x018-001.png)
+
+解压 Unlocker 文件，右键选择以管理员身份运行
+![](/assets/img/note/2018-02-21-windows-environment/0x018-002.png)
