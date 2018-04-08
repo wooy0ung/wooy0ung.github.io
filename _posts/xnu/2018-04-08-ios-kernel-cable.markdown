@@ -81,10 +81,19 @@ redsn0w的历史版本可以在这下载:
 ```
 
 内核信息输出到串口了
-![](/assets/img/xnu/2018-04-08-ios-kernel-cable/0x008.png)
+![](/assets/img/xnu/2018-04-08-ios-kernel-cable/0x009.png)
 
 挂起
 ```
 redsn0w.exe -i iPhone3,1_5.1.1_9B208_Restore.ipsw -j -a "-v debug=0x09"		# DB_KPRT | DB_HALT => 0x09
 ```
 但我这里内核并没有挂起，暂时不知道什么原因，也许是系统版本...
+
+
+## 0x006 参考
+
+[如何调试iOS内核](https://bbs.pediy.com/thread-157624.htm)
+[如何调试iOS内核-补充说明](https://bbs.pediy.com/thread-189854.htm)
+[SyScanTaipei2011_StefanEsser_iOS_Kernel_Exploitation_IOKit_Edition](https://papers.put.as/papers/ios/2011/SyScanTaipei2011_StefanEsser_iOS_Kernel_Exploitation_IOKit_Edition.pdf)
+[iOS内核调试教程](http://www.cocoachina.com/cms/wap.php?action=article&id=21808)
+[iOS内核调试](http://sbim.github.io/ios_kdb.html)
