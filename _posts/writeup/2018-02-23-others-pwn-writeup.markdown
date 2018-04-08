@@ -2,7 +2,7 @@
 layout:     post
 title:      随便做做的部分pwn题
 author:     wooy0ung
-tags: 		pwn
+tags: 		  pwn
 category:  	writeup
 ---
 

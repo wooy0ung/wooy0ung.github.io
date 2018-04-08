@@ -1,8 +1,8 @@
 ---
 layout:		post
-title:		IDA使用记录篇
+title:		工具使用之ida篇
 author:		wooy0ung
-tags:		
+tags:		reverse
 category:  	note
 ---
 

@@ -1,15 +1,13 @@
 ---
 layout:		post
-title:		pwn命令记录篇
+title:		工具使用之tmux篇
 author:		wooy0ung
-tags:		  pwn
-category: note
+tags:		pwn
+category: 	note
 ---
 
 
 >[索引目录]  
->0x001 ROPgadget  
->0x002 Python  
 <!-- more -->
 
 

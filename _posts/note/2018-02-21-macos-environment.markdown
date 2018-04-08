@@ -1,8 +1,8 @@
 ---
-layout:		post
-title:		环境搭建之macOS篇
-author:		wooy0ung
-tags:		macos
+layout:		  post
+title:		  环境搭建之macOS篇
+author:		  wooy0ung
+tags:		    macos
 category:  	note
 ---
 

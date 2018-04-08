@@ -1,9 +1,9 @@
 ---
 layout:		post
-title:		linux二进制学习系统篇
+title:		二进制学习之linux篇
 author:		wooy0ung
 tags:		linux
-category:  	note
+category: 	note
 ---
 
 
@@ -182,9 +182,3 @@ Disassembly of section .text:
  80480ea:   5d                      pop    %ebp
  80480eb:   c3                      ret
 ```
-
-
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-
-
-87   8c    8e   b5

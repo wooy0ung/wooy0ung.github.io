@@ -2,7 +2,7 @@
 layout:     post
 title:      Github Pages + Jekyll搭建个人博客
 author:     wooy0ung
-tags: 		
+tags: 		others
 category:  	note
 ---
 
