@@ -11,6 +11,8 @@ category: note
 >1.工作系统: Windows 7 Professional sp0 x86  
 >2.源码及uC/OS-II库: 链接：https://pan.baidu.com/s/10IzIXYHJSgnF0RT_wo-_8A 密码：p89s  
 >3.Borland C 4.5(BC45): 链接：https://pan.baidu.com/s/1_wPyglzPuwxCtoDvbfqzOA 密码：tpxp  
+<!-- more -->
+
 
 修改D:\uCOS\OS\SOFTWARE\uCOS-II\EX1_x86L\BC45\TEST\MAKETEST.BAT
 ![](/assets/img/note/2018-03-27-ucos-ii-compile/0x001.png)
