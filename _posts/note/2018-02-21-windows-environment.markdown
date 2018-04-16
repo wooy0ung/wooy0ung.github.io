@@ -27,6 +27,7 @@ category:  	note
 >0x016 Windows安装binwalk  
 >0x017 Windows安装pip命令  
 >0x018 VMWare14解锁macOS安装限制  
+>0x019 安装和破解Matlab 2016a  
 
 
 ## 0x001 关闭sublime更新提示
