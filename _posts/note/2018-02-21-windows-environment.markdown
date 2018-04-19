@@ -28,6 +28,7 @@ category:  	note
 >0x017 Windows安装pip命令  
 >0x018 VMWare14解锁macOS安装限制  
 >0x019 安装和破解Matlab 2016a  
+>0x020 一条命令关闭Windows Defender  
 
 
 ## 0x001 关闭sublime更新提示
@@ -106,7 +107,7 @@ SRV*C:\Symbols*http://msdl.microsoft.com/download/symbols
 
 ## 0x007 解决Sublime Text 3中文乱码
 
-下载Package Control.sublime-package，放到Installed Packages
+下载Package Control.sublime-package，选择Preferences->Browse Packages回到上一级目录，放到Installed Packages(没有的话新建一个)
 ```
 http://sublime.wbond.net/Package%20Control.sublime-package
 ```
@@ -377,9 +378,11 @@ if __name__ == "__main__":
 > python setup.py install
 ```
 
+提示"No module named setuptools"，安装setuptools
+
 添加环境变量
 ```
-C:\python27-x64\Scripts
+C:\python27\Scripts
 ```
 
 
@@ -390,3 +393,29 @@ C:\python27-x64\Scripts
 
 解压 Unlocker 文件，右键选择以管理员身份运行
 ![](/assets/img/note/2018-02-21-windows-environment/0x018-002.png)
+
+
+## 0x020 一条命令关闭Windows Defender
+
+```
+# 打开管理员cmd
+> reg add “HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender” /v “DisableAntiSpyware” /d 1 /t REG_DWORD /f
+# 重启
+```
+开启 Windows Defender
+```
+# 打开注册表, 定位到 HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender, 删除 DisableAntiSpyware
+# 重启
+```
+
+注意!! 这会关闭实时防御, 并且无法通过安全中心开启, 但对于防火墙没有影响。
+
+cmd 立即关机
+```
+> shutdown -s -f -t 0
+```
+
+停止 Microsoft (R) Windows Based Script Host
+```
+# 任务管理器找到 wscript kill掉
+```

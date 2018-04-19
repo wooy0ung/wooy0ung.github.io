@@ -15,6 +15,7 @@ category:  	note
 >0x005 解决pip list警告  
 >0x006 安装自定义模块  
 <!-- more -->  
+>0x007 解决"No module named Crypto.Cipher"  
 
 
 ## 0x001 ImportError: No module named pcapy
@@ -102,4 +103,31 @@ setup(name = 'roputils',
 ```
 $ python setup.py sdist
 $ python setup.py install
+```
+
+
+## 0x007 解决"No module named Crypto.Cipher"
+
+安装VCForPython27.msi
+
+下载
+pycrypto
+```
+https://pypi.org/project/pycrypto/#files
+```
+
+编译
+```
+> python setup.py build
+```
+
+提示"error: Unable to find vcvarsall.bat"，找到C:\Python27\Lib\distutils\msvc9compiler.py
+在vcvarsall = find_vcvarsall(version)下面添加这句
+```
+vcvarsall = "C:\Users\wooy0ung\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0"+"/vcvarsall.bat"
+```
+
+安装
+```
+> python setup.py install
 ```

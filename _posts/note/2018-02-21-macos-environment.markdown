@@ -36,6 +36,11 @@ $ sudo spctl --master-disable
 打开系统偏好设置->安全与隐私，选择“任何来源”
 ![](/assets/img/note/2018-02-21-macos-environment/0x001-002.png)
 
+mac查看app使用的框架
+```
+$ otool L Safari
+```
+
 
 ## 0x002 macOS 10.12.x登陆bug修复
 

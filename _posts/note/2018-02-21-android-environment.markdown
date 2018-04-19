@@ -1,6 +1,6 @@
 ﻿---
 layout:		post
-title:		环境搭建之Android篇
+title:		环境搭建之android篇
 author:		wooy0ung
 tags:		android
 category:  	note
@@ -11,6 +11,8 @@ category:  	note
 >0x001 android studio动态调试apk  
 >0x002 jeb2动态调试apk  
 >0x003 windows安装android studio以及配置sdk  
+>0x004 0x004 安装和破解IntelliJ IDEA  
+>0x005 解决"Failure [INSTALL_PARSE_FAILED_NO_CERTIFICATES]"  
 <!-- more -->
 
 
@@ -170,6 +172,15 @@ Active code填入
 ```
 -javaagent:D:\toolchain\system\android\JetBrains\IntelliJ IDEA 2017.2.7\JetbrainsCrack-2.6.9-release-enc.jar
 ```
+
+
+## 0x005 解决"Failure [INSTALL_PARSE_FAILED_NO_CERTIFICATES]"
+
+现象
+![](/assets/img/note/2018-02-21-android-environment/0x005-001.png)
+
+这是apk包没有签名导致的，用apktoolbox签上名，再安装
+![](/assets/img/note/2018-02-21-android-environment/0x005-002.png)
 
 
 ## 0x005 ndk编译hello world真机运行
