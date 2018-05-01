@@ -2,7 +2,7 @@
 layout:     post
 title:      博客上线
 author:     wooy0ung
-tags: 		
+tags: 		others
 category:  	note
 ---
 

@@ -1,8 +1,8 @@
 ---
-layout:		post
-title:		环境搭建之CentOS篇
-author:		wooy0ung
-tags:		centos
+layout:		  post
+title:		  环境搭建之CentOS篇
+author:		  wooy0ung
+tags:		    centos
 category:  	note
 ---
 

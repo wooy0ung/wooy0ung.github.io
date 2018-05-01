@@ -24,6 +24,8 @@ category:  	note
 >0x013 tar解压命令详细参数  
 >0x014 配置arm调试器 & gef脚本  
 >0x015 解决Ubuntu 16.04.3虚拟机开机开机蓝屏  
+>0x016 ubuntu 16.04下的美化配置  
+>0x017 安装wireshark  
 
 
 ## 0x001 启用内置root用户
@@ -35,6 +37,15 @@ $ sudo passwd root
 Enter new UNIX password:
 Retype new UNIX password:
 passwd: password updated successfully
+```
+
+对于Ubuntu 12
+```
+$ cp -p /etc/lightdm/lightdm.conf /etc/lightdm/lightdm.conf.bak
+$ nano /etc/lightdm/lightdm.conf
+
+# 添加
+greeter-show-manual-login=true
 ```
 
 对于Ubuntu 16
@@ -311,7 +322,7 @@ $ zip jpg.zip *.jpg
 
 解压
 ```
-$ tar –xvf file.tar //解压 tar包
+$ tar -xvf file.tar //解压 tar包
 
 $ tar -xzvf file.tar.gz //解压tar.gz
 
@@ -405,3 +416,12 @@ cpuid.1.eax = "0000:0000:0000:0001:0000:0110:1010:0101"
 ```
 
 重启
+
+
+## 0x017 安装wireshark
+
+```
+sudo apt-add-repository ppa:wireshark-dev/stable
+sudo apt-get update
+sudo apt-get install wireshark
+```

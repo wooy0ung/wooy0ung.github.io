@@ -23,6 +23,12 @@ category:  	note
 >0x012 Win10一条命令关闭Windows Defender  
 >0x013 解决Win10运行VC++ 6.0报错  
 >0x014 Win10关闭自动更新 & 清除更新包  
+>0x015 关闭Firefox自动更新  
+>0x016 Windows安装binwalk  
+>0x017 Windows安装pip命令  
+>0x018 VMWare14解锁macOS安装限制  
+>0x019 安装和破解Matlab 2016a  
+>0x020 一条命令关闭Windows Defender  
 
 
 ## 0x001 关闭sublime更新提示
@@ -101,7 +107,7 @@ SRV*C:\Symbols*http://msdl.microsoft.com/download/symbols
 
 ## 0x007 解决Sublime Text 3中文乱码
 
-下载Package Control.sublime-package，放到Installed Packages
+下载Package Control.sublime-package，选择Preferences->Browse Packages回到上一级目录，放到Installed Packages(没有的话新建一个)
 ```
 http://sublime.wbond.net/Package%20Control.sublime-package
 ```
@@ -296,10 +302,120 @@ reg add “HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender” /v
 将另外准备的MSDEV.EXE替换掉.\Microsoft Visual Studio\Common\MSDev98\Bin\MSDEV.EXE
 
 
-### 0x014 Win10关闭自动更新 & 清除更新包
+## 0x014 Win10关闭自动更新 & 清除更新包
 
 Win + R打开services.msc，找到Windows Update禁用掉
 ![](/assets/img/note/2018-02-21-windows-environment/0x014-001.png)
 
 打开磁盘清理->清理系统文件
 ![](/assets/img/note/2018-02-21-windows-environment/0x014-002.png)
+
+
+## 0x015 关闭Firefox自动更新
+
+地址栏输入：about:config，按以下设置
+```
+user_pref("app.update.auto", false); 
+user_pref("app.update.enabled", false);
+```
+
+
+## 0x016 Windows安装binwalk
+
+```
+git clone https://github.com/devttys0/binwalk
+cd binwalk
+python setup.py install
+```
+
+新建D:\toolchain\reverse\binwalk文件夹，添加binwalk.bat
+```
+@echo off
+echo * suggest: you'd better to input the parameters enclosed in double quotes.
+echo * made by pcat
+python "%~dp0\p_binwalk.py" %1 %2 %3 %4 %5 %6 %7 %8 %9
+```
+
+添加p_binwalk.py
+```
+# -*- coding:utf-8 -*-
+# author: pcat
+# http://pcat.cnblogs.com
+ 
+import sys
+import binwalk
+ 
+if __name__ == "__main__":
+    lst=sys.argv
+    if len(lst)<2:
+        print("No files.")
+        exit()
+    try:
+        if lst[1][0]=='-':
+            binwalk.scan(*lst[2:],signature=lst[1])
+        elif lst[1][0]!='-':
+            binwalk.scan(*lst[1:],signature=True)
+    except:
+        pass
+```
+
+安装完成
+![](/assets/img/note/2018-02-21-windows-environment/0x016-001.png)
+
+
+## 0x017 Windows安装pip命令
+
+现象：
+![](/assets/img/note/2018-02-21-windows-environment/0x017-001.png)
+
+下载pip-9.0.2.tar.gz
+```
+链接：https://pan.baidu.com/s/1d_iDb1mP7BEFqWNS1_JMEg 密码：vkse
+```
+
+安装pip
+```
+> python setup.py install
+```
+
+提示"No module named setuptools"，安装setuptools
+
+添加环境变量
+```
+C:\python27\Scripts
+```
+
+
+## 0x018 VMWare14解锁macOS安装限制
+
+打开任务管理器：win+R，输入 services.msc，将关于 VMware 的服务全部停止运行
+![](/assets/img/note/2018-02-21-windows-environment/0x018-001.png)
+
+解压 Unlocker 文件，右键选择以管理员身份运行
+![](/assets/img/note/2018-02-21-windows-environment/0x018-002.png)
+
+
+## 0x020 一条命令关闭Windows Defender
+
+```
+# 打开管理员cmd
+> reg add “HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender” /v “DisableAntiSpyware” /d 1 /t REG_DWORD /f
+# 重启
+```
+开启 Windows Defender
+```
+# 打开注册表, 定位到 HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender, 删除 DisableAntiSpyware
+# 重启
+```
+
+注意!! 这会关闭实时防御, 并且无法通过安全中心开启, 但对于防火墙没有影响。
+
+cmd 立即关机
+```
+> shutdown -s -f -t 0
+```
+
+停止 Microsoft (R) Windows Based Script Host
+```
+# 任务管理器找到 wscript kill掉
+```
