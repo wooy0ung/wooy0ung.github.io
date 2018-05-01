@@ -2,9 +2,8 @@
 layout:     post
 title:      ciscn的一道misc与macOS内核调试
 author:     wooy0ung
-tags: 		  misc
-category:	  writeup
-password:	  20142857
+tags: 		misc
+category:	writeup
 ---
 
 
@@ -15,10 +14,18 @@ password:	  20142857
 <!-- more -->
 
 
-题目下载下来，解压得到kext驱动包，找到agent执行文件![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x001.png)
-kauth_callback_start是驱动入口，装载macOS驱动时会先执行这个函数看到疑似是flag，直接提交不对![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x002.png)
+题目下载下来，解压得到kext驱动包，找到agent执行文件
+![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x001.png)
+kauth_callback_start是驱动入口，装载macOS驱动时会先执行这个函数
 
-根据提示，应该是要core dump，先配置一下环境主机、虚拟机：macOS Sierra 10.12.6虚拟机安装Kernel_Debug_Kit_10.12.6_build_16G29，关掉SIP，主机安装lldb```
+看到疑似是flag，直接提交不对
+![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x002.png)
+
+根据提示，应该是要core dump，先配置一下环境
+主机、虚拟机：macOS Sierra 10.12.6
+虚拟机安装Kernel_Debug_Kit_10.12.6_build_16G29，关掉SIP，主机安装lldb
+
+```
 # command+R进入rescovery mode 
 $ csrutil status
 $ csrutil disable
@@ -33,7 +40,9 @@ $ sudo chmod -R 755 /System/Library/Extensions/agetn.kext
 $ kextutil -i /System/Library/Extensions/agent.kext
 ```
 ![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x003.png)
-这文件记录了崩溃点以及栈回溯信息然后设置引导参数，将KDK的debug支持组件拷贝到/System目录，注意macOS core dump不能存本机，需要指定一个服务机，再次装载驱动
+这文件记录了崩溃点以及栈回溯信息
+
+然后设置引导参数，将KDK的debug支持组件拷贝到/System目录，注意macOS core dump不能存本机，需要指定一个服务机，再次装载驱动
 ```
 # 支持组件
 $ sudo cp -rf /Library/Developer/KDKs/KDK_10.12.6_16G29.kdk/System/Library /System/
@@ -48,19 +57,26 @@ $ sudo launchctl list | grep kdump
 
 # 虚拟机
 $ sudo nvram boot-args="debug=0xd44 _panicd_ip=192.168.1.127"
-```![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x004.png)
-kernel crash以后将core dump传到服务机上![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x005.png)
-等待调试器接入lldb attach上去，注意这里崩溃点在Kauth_callback_stop，驱动卸载时会调用这个函数
+```
+![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x004.png)
+kernel crash以后将core dump传到服务机上
+
+![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x005.png)
+等待调试器接入
+
+lldb attach上去，注意这里崩溃点在Kauth_callback_stop，驱动卸载时会调用这个函数
 ```
 $ lldb
 (lldb) target create /Library/Developer/KDKs/KDK_10.12.6_16G29.kdk/System/Library/Kernels/kernel.development
 (lldb) kdp-remote 192.168.1.127
-```![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x006.png)
+```
+![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x006.png)
 
 猜测flag已经生成好，并且还存在内存中，在本机找到从虚拟机传来的core dump文件
 ```
 $ gunzip xnu-xxx.gz
-```![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x006.png)
+```
+![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x006.png)
 
 补充：顺便记录下用户态crash的核心转储
 
