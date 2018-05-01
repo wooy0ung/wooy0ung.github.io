@@ -9,8 +9,8 @@ category:	writeup
 
 >Problem Description:  
 >请在 macOS High Sierra, macOS Sierra 或 EL Capitan 平台禁用系统签名校验后加载附件中的 Kext 驱动程序，
->macOS 系统会 Panic。请试着分析 Panic 信息，找出隐藏在内存中的密钥。
->题目来自ciscn 2018 memory_forensics
+>macOS 系统会 Panic。请试着分析 Panic 信息，找出隐藏在内存中的密钥。  
+>题目来自ciscn 2018 memory_forensics  
 <!-- more -->
 
 
@@ -76,7 +76,7 @@ $ lldb
 ```
 $ gunzip xnu-xxx.gz
 ```
-![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x006.png)
+![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x007.png)
 
 补充：顺便记录下用户态crash的核心转储
 
