@@ -10,6 +10,7 @@ category:   note
 >[索引目录]  
 >0x001 introduction of XNU's architecture  
 >0x002 analysis of loading mach-o by dyld  
+>0x003 introduce to macho format  
 <!-- more -->
 
 
@@ -74,7 +75,7 @@ sandbox, you can see this picture with traslations
 
 ## 0x002 analysis of loading mach-o by dyld
 
-macho_header，open ./src/machostruc.h
+macho_header，open machostruc.h
 ```
 struct MACHO_HEADER {
     byte    magic[4];
@@ -110,7 +111,7 @@ ImageLoader --> ImageLoaderMachO --> ImageLoaderMachOClassic
                                  --> ImageLoaderMachOCompressed
 ```
 
-open ./src/dyld.c
+open ./src/dyld.c，this part we pay attention to how to load macho file，and ignore other operations
 ```
 //
 // Entry point for dyld.  The kernel loads dyld and jumps to __dyld_start which
@@ -119,167 +120,19 @@ open ./src/dyld.c
 // Returns address of main() in target program which __dyld_start jumps to
 //
 uintptr_t
-_main(const macho_header* mainExecutableMH, uintptr_t mainExecutableSlide,
-        int argc, const char* argv[], const char* envp[], const char* apple[],
+_main(const macho_header* mainExecutableMH, uintptr_t mainExecutableSlide, 
+        int argc, const char* argv[], const char* envp[], const char* apple[], 
         uintptr_t* startGlue)
 {
-    //第一步，设置运行环境，处理环境变量
-    uintptr_t result = 0;
-    sMainExecutableMachHeader = mainExecutableMH;
-
-    ......
-
-    CRSetCrashLogMessage("dyld: launch started");
-
-    ......
-
-    setContext(mainExecutableMH, argc, argv, envp, apple);
-
-    // Pickup the pointer to the exec path.
-    sExecPath = _simple_getenv(apple, "executable_path");
-
-    // <rdar://problem/13868260> Remove interim apple[0] transition code from dyld
-    if (!sExecPath) sExecPath = apple[0];
-
-    ......
-
-    sExecShortName = ::strrchr(sExecPath, '/');
-    if ( sExecShortName != NULL )
-        ++sExecShortName;
-    else
-        sExecShortName = sExecPath;
-    sProcessIsRestricted = processRestricted(mainExecutableMH, &ignoreEnvironmentVariables, &sProcessRequiresLibraryValidation);
-    if ( sProcessIsRestricted ) {
-#if SUPPORT_LC_DYLD_ENVIRONMENT
-        checkLoadCommandEnvironmentVariables();
-#endif     
-        pruneEnvironmentVariables(envp, &apple);
-        setContext(mainExecutableMH, argc, argv, envp, apple);
-    }
-    else {
-        if ( !ignoreEnvironmentVariables )
-            checkEnvironmentVariables(envp);
-        defaultUninitializedFallbackPaths(envp);
-    }
-    if ( sEnv.DYLD_PRINT_OPTS )
-        printOptions(argv);
-    if ( sEnv.DYLD_PRINT_ENV )
-        printEnvironmentVariables(envp);
-    getHostInfo(mainExecutableMH, mainExecutableSlide);
-
-    ......
-
-    //第二步，初始化主程序
+  ... //对全局变量一通操作
     try {
         // add dyld itself to UUID list
         addDyldImageToUUIDList();
         CRSetCrashLogMessage(sLoadingCrashMessage);
         // instantiate ImageLoader for main executable
-        sMainExecutable = instantiateFromLoadedImage(mainExecutableMH, mainExecutableSlide, sExecPath); //加载MACHO到image
-        gLinkContext.mainExecutable = sMainExecutable;
-        gLinkContext.processIsRestricted = sProcessIsRestricted;
-        gLinkContext.processRequiresLibraryValidation = sProcessRequiresLibraryValidation;
-        gLinkContext.mainExecutableCodeSigned = hasCodeSignatureLoadCommand(mainExecutableMH);
-
-        ......
-
-        //第三步，加载共享缓存
-        checkSharedRegionDisable();
-    #if DYLD_SHARED_CACHE_SUPPORT
-        if ( gLinkContext.sharedRegionMode != ImageLoader::kDontUseSharedRegion )
-            mapSharedCache();
-    #endif
-
-        // Now that shared cache is loaded, setup an versioned dylib overrides
-    #if SUPPORT_VERSIONED_PATHS
-        checkVersionedPaths();
-    #endif
-
-        //第四步，加载插入的动态库
-        if    ( sEnv.DYLD_INSERT_LIBRARIES != NULL ) {
-            for (const char* const* lib = sEnv.DYLD_INSERT_LIBRARIES; *lib != NULL; ++lib)
-                loadInsertedDylib(*lib);
-        }
-        sInsertedDylibCount = sAllImages.size()-1;
-
-        //第五步，链接主程序
-        gLinkContext.linkingMainExecutable = true;
-        link(sMainExecutable, sEnv.DYLD_BIND_AT_LAUNCH, true, ImageLoader::RPathChain(NULL, NULL));
-        sMainExecutable->setNeverUnloadRecursive();
-        if ( sMainExecutable->forceFlat() ) {
-            gLinkContext.bindFlat = true;
-            gLinkContext.prebindUsage = ImageLoader::kUseNoPrebinding;
-        }
-
-        //第六步，链接插入的动态库
-        if ( sInsertedDylibCount > 0 ) {
-            for(unsigned int i=0; i < sInsertedDylibCount; ++i) {
-                ImageLoader* image = sAllImages[i+1];
-                link(image, sEnv.DYLD_BIND_AT_LAUNCH, true, ImageLoader::RPathChain(NULL, NULL));
-                image->setNeverUnloadRecursive();
-            }
-            // only INSERTED libraries can interpose
-            for(unsigned int i=0; i < sInsertedDylibCount; ++i) {
-                ImageLoader* image = sAllImages[i+1];
-                image->registerInterposing();
-            }
-        }
-
-        // <rdar://problem/19315404> dyld should support interposition even without DYLD_INSERT_LIBRARIES
-        for (int i=sInsertedDylibCount+1; i < sAllImages.size(); ++i) {
-            ImageLoader* image = sAllImages[i];
-            if ( image->inSharedCache() )
-                continue;
-            image->registerInterposing();
-        }
-
-        // apply interposing to initial set of images
-        for(int i=0; i < sImageRoots.size(); ++i) {
-            sImageRoots[i]->applyInterposing(gLinkContext);
-        }
-
-        //第七步，执行弱符号绑定
-        gLinkContext.linkingMainExecutable = false;
-        // <rdar://problem/12186933> do weak binding only after all inserted images linked
-        sMainExecutable->weakBind(gLinkContext);
-
-        //第八步，执行初始化方法
-        CRSetCrashLogMessage("dyld: launch, running initializers");
-    #if SUPPORT_OLD_CRT_INITIALIZATION
-        // Old way is to run initializers via a callback from crt1.o
-        if ( ! gRunInitializersOldWay )
-            initializeMainExecutable();
-    #else
-        // run all initializers
-        initializeMainExecutable();
-    #endif
-
-        //第九步，查找入口点并返回
-        result = (uintptr_t)sMainExecutable->getThreadPC();
-        if ( result != 0 ) {
-            // main executable uses LC_MAIN, needs to return to glue in libdyld.dylib
-            if ( (gLibSystemHelpers != NULL) && (gLibSystemHelpers->version >= 9) )
-                *startGlue = (uintptr_t)gLibSystemHelpers->startGlueToCallExit;
-            else
-                halt("libdyld.dylib support not present for LC_MAIN");
-        }
-        else {
-            // main executable uses LC_UNIXTHREAD, dyld needs to let "start" in program set up for main()
-            result = (uintptr_t)sMainExecutable->getMain();
-            *startGlue = 0;
-        }
+        sMainExecutable = instantiateFromLoadedImage(mainExecutableMH, mainExecutableSlide, sExecPath);//加载MACHO到image
+        ... //不关心了
     }
-    catch(const char* message) {
-        syncAllImages();
-        halt(message);
-    }
-    catch(...) {
-        dyld::log("dyld: launch failed\n");
-    }
-
-    CRSetCrashLogMessage(NULL);
-
-    return result;
 }
 ```
 
@@ -804,4 +657,478 @@ static void addImage(ImageLoader* image)
     }
     
 }
+```
+
+0x003 introduce to macho format
+
+Mach-O structure
+![](/assets/img/note/2018-05-05-binary-system-macos/0x003-001.png)  
+
+Mach-O header
+```
+/*
+ * The 32-bit mach header appears at the very beginning of the object file for
+ * 32-bit architectures.
+ */
+struct mach_header {
+    uint32_t    magic;      /* mach magic number identifier */
+    cpu_type_t  cputype;    /* cpu specifier */
+    cpu_subtype_t   cpusubtype; /* machine specifier */
+    uint32_t    filetype;   /* type of file */
+    uint32_t    ncmds;      /* number of load commands */
+    uint32_t    sizeofcmds; /* the size of all the load commands */
+    uint32_t    flags;      /* flags */
+};
+
+/* Constant for the magic field of the mach_header (32-bit architectures) */
+#define MH_MAGIC    0xfeedface  /* the mach magic number */
+#define MH_CIGAM    0xcefaedfe  /* NXSwapInt(MH_MAGIC) */
+
+/*
+ * The 64-bit mach header appears at the very beginning of object files for
+ * 64-bit architectures.
+ */
+struct mach_header_64 {
+    uint32_t    magic;      /* mach magic number identifier */
+    cpu_type_t  cputype;    /* cpu specifier */
+    cpu_subtype_t   cpusubtype; /* machine specifier */
+    uint32_t    filetype;   /* type of file */
+    uint32_t    ncmds;      /* number of load commands */
+    uint32_t    sizeofcmds; /* the size of all the load commands */
+    uint32_t    flags;      /* flags */
+    uint32_t    reserved;   /* reserved */
+};
+
+/* Constant for the magic field of the mach_header_64 (64-bit architectures) */
+#define MH_MAGIC_64 0xfeedfacf /* the 64-bit mach magic number */
+#define MH_CIGAM_64 0xcffaedfe /* NXSwapInt(MH_MAGIC_64) */
+```
+
+check Mach-O headers on a file by otool
+```
+$ otool -h ht
+Mach header
+      magic cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags
+ 0xfeedfacf 16777223          3  0x80           2    18       2080 0x00218085
+```
+
+filetype can label exec、lib、coredump and so on...
+````
+#define MH_OBJECT   0x1     /* relocatable object file */
+#define MH_EXECUTE  0x2     /* demand paged executable file */
+#define MH_FVMLIB   0x3     /* fixed VM shared library file */
+#define MH_CORE     0x4     /* core file */
+#define MH_PRELOAD  0x5     /* preloaded executable file */
+#define MH_DYLIB    0x6     /* dynamically bound shared library */
+#define MH_DYLINKER 0x7     /* dynamic link editor */
+#define MH_BUNDLE   0x8     /* dynamically bound bundle file */
+#define MH_DYLIB_STUB   0x9     /* shared library stub for static */
+                    /*  linking only, no section contents */
+#define MH_DSYM     0xa     /* companion file with only debug */
+                    /*  sections */
+#define MH_KEXT_BUNDLE  0xb     /* x86_64 kexts */
+```
+
+flags label dyld loading parameter
+```
+// EXTERNAL_HEADERS/mach-o/x86_64/loader.h
+#define MH_INCRLINK 0x2     /* the object file is the output of an
+                       incremental link against a base file
+                       and can't be link edited again */
+#define MH_DYLDLINK 0x4     /* the object file is input for the
+                       dynamic linker and can't be staticly
+                       link edited again */
+#define MH_BINDATLOAD   0x8     /* the object file's undefined
+                       references are bound by the dynamic
+                       linker when loaded. */
+#define MH_PREBOUND 0x10        /* the file has its dynamic undefined
+                       references prebound. */
+#define MH_SPLIT_SEGS   0x20        /* the file has its read-only and
+                       read-write segments split */
+#define MH_LAZY_INIT    0x40        /* the shared library init routine is
+                       to be run lazily via catching memory
+                       faults to its writeable segments
+                       (obsolete) */
+#define MH_TWOLEVEL 0x80        /* the image is using two-level name
+                       space bindings */
+...
+```
+
+load_command structure
+```
+struct load_command {
+    uint32_t cmd;       /* type of load command */
+    uint32_t cmdsize;   /* total size of command in bytes */
+};
+
+after loading header，load_command would reslove to load macho data by kernel
+```
+static
+load_return_t
+parse_machfile(
+    struct vnode        *vp,       
+    vm_map_t        map,
+    thread_t        thread,
+    struct mach_header  *header,
+    off_t           file_offset,
+    off_t           macho_size,
+    int         depth,
+    int64_t         aslr_offset,
+    int64_t         dyld_aslr_offset,
+    load_result_t       *result
+)
+{
+    [...] //此处省略大量初始化与检测
+
+        /*
+         * Loop through each of the load_commands indicated by the
+         * Mach-O header; if an absurd value is provided, we just
+         * run off the end of the reserved section by incrementing
+         * the offset too far, so we are implicitly fail-safe.
+         */
+        offset = mach_header_sz;
+        ncmds = header->ncmds;
+
+        while (ncmds--) {
+            /*
+             *  Get a pointer to the command.
+             */
+            lcp = (struct load_command *)(addr + offset);
+            //lcp设为当前要解析的cmd的地址
+            oldoffset = offset;
+            //oldoffset是从macho文件内存开始的地方偏移到当前command的偏移量
+            offset += lcp->cmdsize;
+            //重新计算offset，再加上当前command的长度，offset的值为文件内存起始地址到下一个command的偏移量
+            /*
+             * Perform prevalidation of the struct load_command
+             * before we attempt to use its contents.  Invalid
+             * values are ones which result in an overflow, or
+             * which can not possibly be valid commands, or which
+             * straddle or exist past the reserved section at the
+             * start of the image.
+             */
+            if (oldoffset > offset ||
+                lcp->cmdsize < sizeof(struct load_command) ||
+                offset > header->sizeofcmds + mach_header_sz) {
+                ret = LOAD_BADMACHO;
+                break;
+            }
+            //做了一个检测，与如何加载进入内存无关
+
+            /*
+             * Act on struct load_command's for which kernel
+             * intervention is required.
+             */
+            switch(lcp->cmd) {
+            case LC_SEGMENT:
+                [...]
+                ret = load_segment(lcp,
+                                   header->filetype,
+                                   control,
+                                   file_offset,
+                                   macho_size,
+                                   vp,
+                                   map,
+                                   slide,
+                                   result);
+                break;
+            case LC_SEGMENT_64:
+                [...]
+                ret = load_segment(lcp,
+                                   header->filetype,
+                                   control,
+                                   file_offset,
+                                   macho_size,
+                                   vp,
+                                   map,
+                                   slide,
+                                   result);
+                break;
+            case LC_UNIXTHREAD:
+                if (pass != 1)
+                    break;
+                ret = load_unixthread(
+                         (struct thread_command *) lcp,
+                         thread,
+                         slide,
+                         result);
+                break;
+            case LC_MAIN:
+                if (pass != 1)
+                    break;
+                if (depth != 1)
+                    break;
+                ret = load_main(
+                         (struct entry_point_command *) lcp,
+                         thread,
+                         slide,
+                         result);
+                break;
+            case LC_LOAD_DYLINKER:
+                if (pass != 3)
+                    break;
+                if ((depth == 1) && (dlp == 0)) {
+                    dlp = (struct dylinker_command *)lcp;
+                    dlarchbits = (header->cputype & CPU_ARCH_MASK);
+                } else {
+                    ret = LOAD_FAILURE;
+                }
+                break;
+            case LC_UUID:
+                if (pass == 1 && depth == 1) {
+                    ret = load_uuid((struct uuid_command *) lcp,
+                            (char *)addr + mach_header_sz + header->sizeofcmds,
+                            result);
+                }
+                break;
+            case LC_CODE_SIGNATURE:
+                [...]
+                ret = load_code_signature(
+                    (struct linkedit_data_command *) lcp,
+                    vp,
+                    file_offset,
+                    macho_size,
+                    header->cputype,
+                    result);
+                [...]
+                break;
+#if CONFIG_CODE_DECRYPTION
+            case LC_ENCRYPTION_INFO:
+            case LC_ENCRYPTION_INFO_64:
+                if (pass != 3)
+                    break;
+                ret = set_code_unprotect(
+                    (struct encryption_info_command *) lcp,
+                    addr, map, slide, vp, file_offset,
+                    header->cputype, header->cpusubtype);
+                if (ret != LOAD_SUCCESS) {
+                    printf("proc %d: set_code_unprotect() error %d "
+                           "for file \"%s\"\n",
+                           p->p_pid, ret, vp->v_name);
+                    /* 
+                     * Don't let the app run if it's 
+                     * encrypted but we failed to set up the
+                     * decrypter. If the keys are missing it will
+                     * return LOAD_DECRYPTFAIL.
+                     */
+                     if (ret == LOAD_DECRYPTFAIL) {
+                        /* failed to load due to missing FP keys */
+                        proc_lock(p);
+                        p->p_lflag |= P_LTERM_DECRYPTFAIL;
+                        proc_unlock(p);
+                     }
+                     psignal(p, SIGKILL);
+                }
+                break;
+#endif
+            default:
+                /* Other commands are ignored by the kernel */
+                ret = LOAD_SUCCESS;
+                break;
+            }
+            if (ret != LOAD_SUCCESS)
+                break;
+        }
+        if (ret != LOAD_SUCCESS)
+            break;
+    }
+
+    [...] //此处略去加载之后的处理代码
+}
+```
+
+cmdsize segment
+```
+...
+lcp = (struct load_command *)(addr + offset);
+//lcp设为当前要解析的cmd的地址
+oldoffset = offset;
+//oldoffset是从macho文件内存开始的地方偏移到当前command的偏移量
+offset += lcp->cmdsize;
+//重新计算offset，再加上当前command的长度，offset的值为文件内存起始地址到下一个command的偏移量
+...
+```
+
+cmd segment
+```
+switch(lcp->cmd) {
+            case LC_SEGMENT:
+                [...]
+                ret = load_segment(lcp,
+                                   header->filetype,
+                                   control,
+                                   file_offset,
+                                   macho_size,
+                                   vp,
+                                   map,
+                                   slide,
+                                   result);
+                break;
+            case LC_SEGMENT_64:
+                [...]
+                ret = load_segment(lcp,
+                                   header->filetype,
+                                   control,
+                                   file_offset,
+                                   macho_size,
+                                   vp,
+                                   map,
+                                   slide,
+                                   result);
+                break;
+            case LC_UNIXTHREAD:
+                if (pass != 1)
+                    break;
+                ret = load_unixthread(
+                         (struct thread_command *) lcp,
+                         thread,
+                         slide,
+                         result);
+                break;
+            case LC_MAIN:
+                if (pass != 1)
+                    break;
+                if (depth != 1)
+                    break;
+                ret = load_main(
+                         (struct entry_point_command *) lcp,
+                         thread,
+                         slide,
+                         result);
+                break;
+            case LC_LOAD_DYLINKER:
+                if (pass != 3)
+                    break;
+                if ((depth == 1) && (dlp == 0)) {
+                    dlp = (struct dylinker_command *)lcp;
+                    dlarchbits = (header->cputype & CPU_ARCH_MASK);
+                } else {
+                    ret = LOAD_FAILURE;
+                }
+                break;
+            case LC_UUID:
+                if (pass == 1 && depth == 1) {
+                    ret = load_uuid((struct uuid_command *) lcp,
+                            (char *)addr + mach_header_sz + header->sizeofcmds,
+                            result);
+                }
+                break;
+            case LC_CODE_SIGNATURE:
+                [...]
+                ret = load_code_signature(
+                    (struct linkedit_data_command *) lcp,
+                    vp,
+                    file_offset,
+                    macho_size,
+                    header->cputype,
+                    result);
+                [...]
+                break;
+#if CONFIG_CODE_DECRYPTION
+            case LC_ENCRYPTION_INFO:
+            case LC_ENCRYPTION_INFO_64:
+                if (pass != 3)
+                    break;
+                ret = set_code_unprotect(
+                    (struct encryption_info_command *) lcp,
+                    addr, map, slide, vp, file_offset,
+                    header->cputype, header->cpusubtype);
+                if (ret != LOAD_SUCCESS) {
+                    printf("proc %d: set_code_unprotect() error %d "
+                           "for file \"%s\"\n",
+                           p->p_pid, ret, vp->v_name);
+                    /* 
+                     * Don't let the app run if it's 
+                     * encrypted but we failed to set up the
+                     * decrypter. If the keys are missing it will
+                     * return LOAD_DECRYPTFAIL.
+                     */
+                     if (ret == LOAD_DECRYPTFAIL) {
+                        /* failed to load due to missing FP keys */
+                        proc_lock(p);
+                        p->p_lflag |= P_LTERM_DECRYPTFAIL;
+                        proc_unlock(p);
+                     }
+                     psignal(p, SIGKILL);
+                }
+                break;
+#endif
+            default:
+                /* Other commands are ignored by the kernel */
+                ret = LOAD_SUCCESS;
+                break;
+            }
+```
+
+segment
+```
+struct segment_command { /* for 32-bit architectures */
+    uint32_t    cmd;        /* LC_SEGMENT */
+    uint32_t    cmdsize;    /* includes sizeof section structs */
+    char        segname[16];    /* segment name */
+    uint32_t    vmaddr;     /* memory address of this segment */
+    uint32_t    vmsize;     /* memory size of this segment */
+    uint32_t    fileoff;    /* file offset of this segment */
+    uint32_t    filesize;   /* amount to map from the file */
+    vm_prot_t   maxprot;    /* maximum VM protection */
+    vm_prot_t   initprot;   /* initial VM protection */
+    uint32_t    nsects;     /* number of sections in segment */
+    uint32_t    flags;      /* flags */
+};
+
+
+struct segment_command_64 { /* for 64-bit architectures */
+    uint32_t    cmd;        /* LC_SEGMENT_64 */
+    uint32_t    cmdsize;    /* includes sizeof section_64 structs */
+    char        segname[16];    /* segment name */
+    uint64_t    vmaddr;     /* memory address of this segment */
+    uint64_t    vmsize;     /* memory size of this segment */
+    uint64_t    fileoff;    /* file offset of this segment */
+    uint64_t    filesize;   /* amount to map from the file */
+    vm_prot_t   maxprot;    /* maximum VM protection */
+    vm_prot_t   initprot;   /* initial VM protection */
+    uint32_t    nsects;     /* number of sections in segment */
+    uint32_t    flags;      /* flags */
+};
+```
+
+section
+```
+struct section { /* for 32-bit architectures */
+    char        sectname[16];   /* name of this section */
+    char        segname[16];    /* segment this section goes in */
+    uint32_t    addr;       /* memory address of this section */
+    uint32_t    size;       /* size in bytes of this section */
+    uint32_t    offset;     /* file offset of this section */
+    uint32_t    align;      /* section alignment (power of 2) */
+    uint32_t    reloff;     /* file offset of relocation entries */
+    uint32_t    nreloc;     /* number of relocation entries */
+    uint32_t    flags;      /* flags (section type and attributes)*/
+    uint32_t    reserved1;  /* reserved (for offset or index) */
+    uint32_t    reserved2;  /* reserved (for count or sizeof) */
+};
+
+struct section_64 { /* for 64-bit architectures */
+    char        sectname[16];   /* name of this section */
+    char        segname[16];    /* segment this section goes in */
+    uint64_t    addr;       /* memory address of this section */
+    uint64_t    size;       /* size in bytes of this section */
+    uint32_t    offset;     /* file offset of this section */
+    uint32_t    align;      /* section alignment (power of 2) */
+    uint32_t    reloff;     /* file offset of relocation entries */
+    uint32_t    nreloc;     /* number of relocation entries */
+    uint32_t    flags;      /* flags (section type and attributes)*/
+    uint32_t    reserved1;  /* reserved (for offset or index) */
+    uint32_t    reserved2;  /* reserved (for count or sizeof) */
+    uint32_t    reserved3;  /* reserved */
+};
+```
+
+section examples
+```
+Section         function
+__text          code
+__cstring       constant string
+__const const   variable
+__DATA.__bss    bss segment
 ```
