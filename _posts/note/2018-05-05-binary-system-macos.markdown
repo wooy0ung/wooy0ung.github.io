@@ -7,10 +7,11 @@ category:   note
 ---
 
 
->[索引目录]  
+>[index]  
 >0x001 introduction of XNU's architecture  
 >0x002 analysis of loading mach-o by dyld  
 >0x003 introduce to macho format  
+>0x004 macho dynamic link  
 <!-- more -->
 
 
@@ -1132,3 +1133,6 @@ __cstring       constant string
 __const const   variable
 __DATA.__bss    bss segment
 ```
+
+
+## 0x004 macho dynamic link

@@ -16,6 +16,7 @@ category:  	note
 >0x006 安装自定义模块  
 <!-- more -->  
 >0x007 解决"No module named Crypto.Cipher"  
+>0x008 用virtualenv管理依赖  
 
 
 ## 0x001 ImportError: No module named pcapy
@@ -131,3 +132,25 @@ vcvarsall = "C:\Users\wooy0ung\AppData\Local\Programs\Common\Microsoft\Visual C+
 ```
 > python setup.py install
 ```
+
+
+## 0x008 用virtualenv管理依赖
+
+安装virtualenv
+```
+$ sudo pip install virtualenv
+```
+
+创建虚拟环境
+```
+$ virtualenv lldb
+```
+
+打开环境
+```
+$ source ./lldb/bin/activate
+```
+
+退出
+```
+$ deactivate

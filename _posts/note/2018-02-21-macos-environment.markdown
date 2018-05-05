@@ -21,7 +21,8 @@ category:  	note
 >0x010 安装Reveal8 & 分析iOS UI  
 >0x011 解决Github Authentication failed  
 >0x012 配置php环境  
-
+>0x013 用tmuxinator更好管理你的lldb  
+>0x014 安装angr二进制分析环境  
 
 ## 0x001 解决macOS 10.12.x软件包提示损坏
 
@@ -551,3 +552,69 @@ echo $strDemo;
 
 Build System选择php, command+B运行
 ![](/assets/img/note/2018-02-21-macos-environment/0x011-004.png)
+
+
+## 0x013 用tmuxinator更好管理你的lldb
+
+安装tmux、tmuxinator
+```
+$ brew install tmux
+$ gem install tmuxinator
+```
+
+配置
+```
+$ echo $EDITOR
+$ export EDITR='vim'
+$ tmuxinator new voltron
+```
+
+修改配置文件
+```
+# ~/.tmuxinator/voltron.yml
+name: voltron
+root: ~/
+windows:
+  # two spaces
+  - madhax:
+      # four spaces
+      layout: 15a8,169x41,0,0{147x41,0,0[147x13,0,0{81x13,0,0,60,65x13,82,0,61},147x19,0,14,62,147x7,0,34{89x7,0,34,63,57x7,90,34,64}],21x41,148,0,65}
+      panes:
+        # two spaces
+        - voltron view disasm
+        - voltron view bp
+        - lldb
+        - voltron view stack
+        - voltron view bt
+        - voltron view reg
+```
+
+以后需要lldb，直接
+```
+$ tmuxinator start voltron
+```
+退出直接C-b + k即可
+
+
+## 0x014 安装angr二进制分析环境
+
+创建一个虚拟环境
+```
+$ virtualenv angr
+```
+
+打开
+```
+$ source ./angr/bin/activate
+```
+
+安装angr
+```
+$ pip install angr-only-z3-custom
+$ pip install angr
+```
+
+退出
+```
+$ deactivate
+```
