@@ -1219,3 +1219,362 @@ String Table offset and len
 
 LC_DYSYMTAB，provide dynamic link table offset and num
 ![](/assets/img/note/2018-05-05-binary-system-macos/0x004-005.png) 
+
+
+## 0x005 Load dylib by dyld
+
+after loading exec file, other dylib would be loaded as well
+```
+// load any inserted libraries
+// 类似于linux里面的LD_PRELOAD
+if  ( sEnv.DYLD_INSERT_LIBRARIES != NULL ) {
+    for (const char* const* lib = sEnv.DYLD_INSERT_LIBRARIES; *lib != NULL; ++lib) 
+        loadInsertedDylib(*lib); //!!!动态加载dylib
+}
+// record count of inserted libraries so that a flat search will look at 
+// inserted libraries, then main, then others.
+sInsertedDylibCount = sAllImages.size()-1;
+```
+
+these functions may call load eventually
+![](/assets/img/note/2018-05-05-binary-system-macos/0x005-001.png) 
+
+Load
+```
+//处理suffix字段。
+//通过loadPhase0函数从share_cache中加载image。
+//如果share_cache中不存在image，则再使用不同的参数调用loadPhase0函数，通过open函数读取文件并加载image到内存中。
+//函数调用结束后的内存管理
+//
+//根据所有的环境变量生成路径，去加载一个ImageLoader
+ImageLoader* load(const char* path, const LoadContext& context)
+{
+    CRSetCrashLogMessage2(path);
+    const char* orgPath = path;
+    
+    //dyld::log("%s(%s)\n", __func__ , path);
+    char realPath[PATH_MAX];
+    // when DYLD_IMAGE_SUFFIX is in used, do a realpath(), otherwise a load of "Foo.framework/Foo" will not match
+    // 当设置了DYLD_IMAGE_SUFFIX字段，需要使用realpath来加载
+    if ( context.useSearchPaths && ( gLinkContext.imageSuffix != NULL) ) {
+        if ( realpath(path, realPath) != NULL )
+            path = realPath;
+    }
+    
+    // try all path permutations and check against existing loaded images
+    // 尝试各种路径组合去加载image
+    ImageLoader* image = loadPhase0(path, orgPath, context, NULL);
+    if ( image != NULL ) {
+        CRSetCrashLogMessage2(NULL);
+        return image;
+    }
+
+    // try all path permutations and try open() until first success
+    std::vector<const char*> exceptions;
+    image = loadPhase0(path, orgPath, context, &exceptions);
+    
+    /*...*/
+
+    CRSetCrashLogMessage2(NULL);
+    if ( image != NULL ) {
+        /* 加载成功内存处理*/
+        return image;
+    }
+    else if ( exceptions.size() == 0 ) {
+        /* 出错处理 */
+    }
+    else {
+        /* 出错处理 */
+    }
+}
+```
+
+loadPhase0
+```
+//遍历DYLD_ROOT_PATH环境变量，生成加载路径，调用loadPhase1。
+//如果不存在DYLD_ROOT_PATH环境变量，则使用原始的路径
+//
+// try root substitutions
+// 主要处理DYLD_ROOT_PATH环境变量的功能，修饰Loadimage时候的path
+// 运行完结之后执行loadPhase1
+static ImageLoader* loadPhase0(const char* path, const char* orgPath, const LoadContext& context, std::vector<const char*>* exceptions)
+{
+    //dyld::log("%s(%s, %p)\n", __func__ , path, exceptions);
+    
+    // handle DYLD_ROOT_PATH which forces absolute paths to use a new root
+    if ( (gLinkContext.rootPaths != NULL) && (path[0] == '/') ) {
+        for(const char* const* rootPath = gLinkContext.rootPaths ; *rootPath != NULL; ++rootPath) {
+            char newPath[strlen(*rootPath) + strlen(path)+2];
+            strcpy(newPath, *rootPath);
+            strcat(newPath, path);
+            ImageLoader* image = loadPhase1(newloadPhase1Path, orgPath, context, exceptions);
+            if ( image != NULL )
+                return image;
+        }
+    }
+
+    // try raw path
+    return loadPhase1(path, orgPath, context, exceptions);
+}
+```
+
+loadPhase1
+```
+//通过LD_LIBRARY_PATH参数组成的所有路径，通过loadPhase2尝试加载image。
+//当无法通过LD_LIBRARY_PATH获取image时，则通过DYLD_FRAMEWORK_PATH与DYLD_LIBRARY_PATH组成的路径，通过loadPhase2尝试加载image。
+//如果上面两个流程都无法加载到image则通过原始路径通过loadPhase3尝试加载image。
+//如果依然无法加载到image则通过DYLD_FALLBACK_FRAMEWORK_PATH环境变量，组成路径最后尝试加载image。
+//
+static ImageLoader* loadPhase1(const char* path, const char* orgPath, const LoadContext& context, std::vector<const char*>* exceptions)
+{
+    //dyld::log("%s(%s, %p)\n", __func__ , path, exceptions);
+    ImageLoader* image = NULL;
+
+    // handle LD_LIBRARY_PATH environment variables that force searching
+    // 如果存在LD_LIBRARY_PATH变量，优先通过LD_LIBRARY_PATH中设置的路径进行搜索和加载
+    if ( context.useLdLibraryPath && (sEnv.LD_LIBRARY_PATH != NULL) ) {
+        image = loadPhase2(path, orgPath, context, NULL, sEnv.LD_LIBRARY_PATH, exceptions);
+        if ( image != NULL )
+            return image;
+    }
+
+    // handle DYLD_ environment variables that force searching
+    // 如果使用了DYLD_FRAMEWORK_PATH或者sEnv.DYLD_LIBRARY_PATH，则使用这两个环境变量去加载
+    if ( context.useSearchPaths && ((sEnv.DYLD_FRAMEWORK_PATH != NULL) || (sEnv.DYLD_LIBRARY_PATH != NULL)) ) {
+        image = loadPhase2(path, orgPath, context, sEnv.DYLD_FRAMEWORK_PATH, sEnv.DYLD_LIBRARY_PATH, exceptions);
+        if ( image != NULL )
+            return image;
+    }
+    
+    // try raw path
+    // 如果上面的环境变量都没有设置，就使用原始地址去加载
+    // 函数是loadphase3
+    image = loadPhase3(path, orgPath, context, exceptions);
+    if ( image != NULL )
+        return image;
+    
+    // try fallback paths during second time (will open file)
+    const char* const* fallbackLibraryPaths = sEnv.DYLD_FALLBACK_LIBRARY_PATH;
+    if ( (fallbackLibraryPaths != NULL) && !context.useFallbackPaths )
+        fallbackLibraryPaths = NULL;
+    if ( !context.dontLoad  && (exceptions != NULL) && ((sEnv.DYLD_FALLBACK_FRAMEWORK_PATH != NULL) || (fallbackLibraryPaths != NULL)) ) {
+        image = loadPhase2(path, orgPath, context, sEnv.DYLD_FALLBACK_FRAMEWORK_PATH, fallbackLibraryPaths, exceptions);
+        if ( image != NULL )
+            return image;
+    }
+        
+    return NULL;
+}
+```
+
+loadPhase2 to loadPhase4 reference
+[loadPhase2](https://github.com/turingH/dyld_soucecode_analysis/blob/master/src/dyld.cpp#L2933)
+[loadPhase3](https://github.com/turingH/dyld_soucecode_analysis/blob/master/src/dyld.cpp#L2820)
+[loadPhase4](https://github.com/turingH/dyld_soucecode_analysis/blob/master/src/dyld.cpp#L2797)
+
+loadPhase5
+```
+//loadPhase5根据参数exceptions的不同形成了两个不同的分支。
+//loadPhase5load：通过读取文件，加载文件到内存中，实例化ImageLoader。
+//loadPhase5check: 通过遍历已经加载的ImageLoader的容器，获取已经加载的ImageLoader。
+//
+// open or check existing
+// 检测是否有覆盖的，修正path，最后调用loadPhase5Load或者check
+static ImageLoader* loadPhase5(const char* path, const char* orgPath, const LoadContext& context, std::vector<const char*>* exceptions)
+{
+    //dyld::log("%s(%s, %p)\n", __func__ , path, exceptions);
+    
+    // check for specific dylib overrides
+    for (std::vector<DylibOverride>::iterator it = sDylibOverrides.begin(); it != sDylibOverrides.end(); ++it) {
+        if ( strcmp(it->installName, path) == 0 ) {
+            path = it->override;
+            break;
+        }
+    }
+    
+    if ( exceptions != NULL ) 
+        return loadPhase5load(path, orgPath, context, exceptions);
+    else
+        return loadPhase5check(path, orgPath, context);
+}
+```
+
+loadPhase5load
+```
+//防止Image改名，在Image的容器里面遍历，检查是否已经加载
+//在SharedCache寻找是否存在Image的缓存，如果存在的使用ImageLoaderMachO::instantiateFromCache来实例化ImageLoader。
+//如果上面两个都没有找到的话，就通过loadPhase5open打开文件，并读取到内存。
+//
+static ImageLoader* loadPhase5load(const char* path, const char* orgPath, const LoadContext& context, std::vector<const char*>* exceptions)
+{
+    //dyld::log("%s(%s, %p)\n", __func__ , path, exceptions);
+    ImageLoader* image = NULL;
+
+    // just return NULL if file not found, but record any other errors
+    struct stat stat_buf;
+    if ( my_stat(path, &stat_buf) == -1 ) {
+        int err = errno;
+        if ( err != ENOENT ) {
+            exceptions->push_back(dyld::mkstringf("%s: stat() failed with errno=%d", path, err));
+        }
+        return NULL;
+    }
+    
+    // in case image was renamed or found via symlinks, check for inode match
+    image = findLoadedImage(stat_buf);
+    if ( image != NULL )
+        return image;
+    
+    // do nothing if not already loaded and if RTLD_NOLOAD or NSADDIMAGE_OPTION_RETURN_ONLY_IF_LOADED
+    //RTLD_NOLOAD或者NSADDIMAGE_OPTION_RETURN_ONLY_IF_LOADED字段设置了则不进行加载
+    if ( context.dontLoad )
+        return NULL;
+
+#if DYLD_SHARED_CACHE_SUPPORT
+    // see if this image is in shared cache
+    const macho_header* mhInCache;
+    const char*         pathInCache;
+    long                slideInCache;
+    // 如果在sharedCacheImage中找到了，则通过cache来加载
+    if ( findInSharedCacheImage(path, false, &stat_buf, &mhInCache, &pathInCache, &slideInCache) ) {
+        image = ImageLoaderMachO::instantiateFromCache(mhInCache, pathInCache, slideInCache, stat_buf, gLinkContext);
+        return checkandAddImage(image, context);
+    }
+#endif
+    // file exists and is not in dyld shared cache, so open it
+    // shared_cache中不存在image，则通过LoadPhase5open来加载image
+    return loadPhase5open(path, context, stat_buf, exceptions);
+}
+```
+
+loadPhase5open
+```
+//根据路径打开文件
+//调用loadPhase6
+//
+static ImageLoader* loadPhase5open(const char* path, const LoadContext& context, const struct stat& stat_buf, std::vector<const char*>* exceptions)
+{
+    //dyld::log("%s(%s, %p)\n", __func__ , path, exceptions);
+
+    // open file (automagically closed when this function exits)
+    FileOpener file(path);
+        
+    // just return NULL if file not found, but record any other errors
+    if ( file.getFileDescriptor() == -1 ) {
+        int err = errno;
+        if ( err != ENOENT ) {
+            const char* newMsg = dyld::mkstringf("%s: open() failed with errno=%d", path, err);
+            exceptions->push_back(newMsg);
+        }
+        return NULL;
+    }
+
+    try {
+        return loadPhase6(file.getFileDescriptor(), stat_buf, path, context);
+    }
+    catch (const char* msg) {
+        const char* newMsg = dyld::mkstringf("%s: %s", path, msg);
+        exceptions->push_back(newMsg);
+        free((void*)msg);
+        return NULL;
+    }
+}
+```
+
+loadPhase6
+```
+//做了Fat格式的检测，子类型文件提取。
+//检测Mach-O类型，只有MH_EXECUTE，MH_DYLIB，MH_BUNDLE三种文件才可被动态加载。
+//通过ImageLoaderMachO::instantiateFromFile生成ImageLoader的实例。
+//
+static ImageLoader* loadPhase6(int fd, const struct stat& stat_buf, const char* path, const LoadContext& context)
+{
+    //dyld::log("%s(%s)\n", __func__ , path);
+    uint64_t fileOffset = 0;
+    uint64_t fileLength = stat_buf.st_size;
+
+    // validate it is a file (not directory)
+    if ( (stat_buf.st_mode & S_IFMT) != S_IFREG ) 
+        throw "not a file";
+
+    uint8_t firstPage[4096];
+    bool shortPage = false;
+    
+    // min mach-o file is 4K
+    if ( fileLength < 4096 ) {
+        if ( pread(fd, firstPage, fileLength, 0) != (ssize_t)fileLength )
+            throwf("pread of short file failed: %d", errno);
+        shortPage = true;
+    } 
+    else {
+        if ( pread(fd, firstPage, 4096,0) != 4096 )
+            throwf("pread of first 4K failed: %d", errno);
+    }
+    
+    // if fat wrapper, find usable sub-file
+    // 如果是一个fat格式的文件，找到对应的子文件
+    // 从fat文件中找到对应子文件的代码。
+    const fat_header* fileStartAsFat = (fat_header*)firstPage;
+    if ( fileStartAsFat->magic == OSSwapBigToHostInt32(FAT_MAGIC) ) {
+        if ( fatFindBest(fileStartAsFat, &fileOffset, &fileLength) ) {
+            if ( (fileOffset+fileLength) > (uint64_t)(stat_buf.st_size) )
+                throwf("truncated fat file.  file length=%llu, but needed slice goes to %llu", stat_buf.st_size, fileOffset+fileLength);
+            if (pread(fd, firstPage, 4096, fileOffset) != 4096)
+                throwf("pread of fat file failed: %d", errno);
+        }
+        else {
+            throw "no matching architecture in universal wrapper";
+        }
+    }
+    
+    // try mach-o loader
+    if ( shortPage ) 
+        throw "file too short";
+    // 检测运行平台是否正确
+    if ( isCompatibleMachO(firstPage, path) ) {
+    
+        // only MH_BUNDLE, MH_DYLIB, and some MH_EXECUTE can be dynamically loaded
+        // 只有MH_EXECUTE，MH_DYLIB，MH_BUNDLE三种文件才可被动态加载
+        switch ( ((mach_header*)firstPage)->filetype ) {
+            case MH_EXECUTE:
+            case MH_DYLIB:
+            case MH_BUNDLE:
+                break;
+            default:
+                throw "mach-o, but wrong filetype";
+        }
+
+#if TARGET_IPHONE_SIMULATOR 
+    #if TARGET_OS_WATCH || TARGET_OS_TV
+        // disable error during bring up of these simulators
+    #else
+        // <rdar://problem/14168872> dyld_sim should restrict loading osx binaries
+        if ( !isSimulatorBinary(firstPage, path) ) {
+            throw "mach-o, but not built for iOS simulator";
+        }
+    #endif
+#endif
+
+        // instantiate an image
+        ImageLoader* image = ImageLoaderMachO::instantiateFromFile(path, fd, firstPage, fileOffset, fileLength, stat_buf, gLinkContext);
+        
+        // validate
+        return checkandAddImage(image, context);
+    }
+    
+    // try other file formats here...
+    
+    
+    // throw error about what was found
+    switch (*(uint32_t*)firstPage) {
+        case MH_MAGIC:
+        case MH_CIGAM:
+        case MH_MAGIC_64:
+        case MH_CIGAM_64:
+            throw "mach-o, but wrong architecture";
+        default:
+        throwf("unknown file type, first eight bytes: 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X", 
+            firstPage[0], firstPage[1], firstPage[2], firstPage[3], firstPage[4], firstPage[5], firstPage[6],firstPage[7]);
+    }
+}
+```
