@@ -1136,3 +1136,86 @@ __DATA.__bss    bss segment
 
 
 ## 0x004 macho dynamic link
+
+level1.c
+```
+#include <stdio.h>
+
+int main(int argc, const char * argv[]) {
+    // insert code here...
+    printf("Hello, World!\n");
+    printf("2Hello, World!\n");
+    return 0;
+}
+```
+
+first printf
+```
+level1`main:                                                                                                        │
+->  0x100000f52 <+34>: callq  0x100000f76               ; symbol stub for: printf                                   │
+    0x100000f57 <+39>: leaq   0x47(%rip), %rdi          ; "2Hello, World!\n"                                        │
+    0x100000f5e <+46>: movl   %eax, -0x14(%rbp)                                                                     │
+    0x100000f61 <+49>: movb   $0x0, %al                                                                             │
+Target 0: (level1) stopped.
+```
+
+step into
+```
+level1`printf:                                                                                                      │
+->  0x100000f76 <+0>: jmpq   *0x94(%rip)               ; (void *)0x0000000100000f8c                                 │
+    0x100000f7c:      leaq   0x85(%rip), %r11          ; (void *)0x0000000000000000                                 │
+    0x100000f83:      pushq  %r11                                                                                   │
+    0x100000f85:      jmpq   *0x75(%rip)               ; (void *)0x00007fffb4666168: dyld_stub_binder               │
+Target 0: (level1) stopped.
+```
+
+get 0x0000000100000f8c by Lazy Symbol Pointers
+![](/assets/img/note/2018-05-05-binary-system-macos/0x004-001.png) 
+
+jmp to 0x100000f8c
+```
+* thread #1, queue = 'com.apple.main-thread', stop reason = instruction step into                                   │
+    frame #0: 0x0000000100000f8c level1                                                                             │
+->  0x100000f8c: pushq  $0x0                                                                                        │
+    0x100000f91: jmp    0x100000f7c                                                                                 │
+    0x100000f96: gs                                                                                                 │
+    0x100000f98: insb   %dx, %es:(%rdi)                                                                             │
+Target 0: (level1) stopped.
+```
+
+push 0x0, the symbol num，you can get it at Symbol Stub
+![](/assets/img/note/2018-05-05-binary-system-macos/0x004-002.png) 
+
+jump to __stub__helper, calculate prtinf_addr by calling dyld_stubbinder
+```
+* thread #1, queue = 'com.apple.main-thread', stop reason = instruction step over                                   │
+    frame #0: 0x0000000100000f7c level1                                                                             │
+->  0x100000f7c: leaq   0x85(%rip), %r11          ; (void *)0x0000000000000000                                      │
+    0x100000f83: pushq  %r11                                                                                        │
+    0x100000f85: jmpq   *0x75(%rip)               ; (void *)0x00007fffb4666168: dyld_stub_binder                    │
+    0x100000f8b: nop                                                                                                │
+Target 0: (level1) stopped.
+```
+![](/assets/img/note/2018-05-05-binary-system-macos/0x004-003.png) 
+
+goto second printf，now we get printf_addr at 0x0000000100000f76(Lazy Symbol Pointers)
+```
+level1`printf:                                                                                                      │
+->  0x100000f76 <+0>: jmpq   *0x94(%rip)               ; (void *)0x00007fffb46e3180: printf                         │
+    0x100000f7c:      leaq   0x85(%rip), %r11          ; (void *)0x0000000100045b80: initialPoolContent + 592       │
+    0x100000f83:      pushq  %r11                                                                                   │
+    0x100000f85:      jmpq   *0x75(%rip)               ; (void *)0x00007fffb4666168: dyld_stub_binder               │
+Target 0: (level1) stopped.
+```
+
+That's all, but we need to learn other data structure
+
+LC_SYMTAB，provide some info
+![](/assets/img/note/2018-05-05-binary-system-macos/0x004-004.png) 
+```
+Symbol Table offset and num # include all calling funtions info
+String Table offset and len
+```
+
+LC_DYSYMTAB，provide dynamic link table offset and num
+![](/assets/img/note/2018-05-05-binary-system-macos/0x004-005.png) 
