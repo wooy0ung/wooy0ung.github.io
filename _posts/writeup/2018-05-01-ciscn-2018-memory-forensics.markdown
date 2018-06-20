@@ -35,8 +35,8 @@ $ csrutil disable
 直接装载驱动，会出现mac下的“BSOD”五国提示，重启后会在/Library/Logs/DiagnosticReports找到panic log
 ```
 # agent.kext拷贝到/System/Library/Extensions
-$ sudo chown -R root: wheel /System/Library/Extensions/agent.kext
-$ sudo chmod -R 755 /System/Library/Extensions/agetn.kext
+$ sudo chown -R root:wheel /System/Library/Extensions/agent.kext
+$ sudo chmod -R 755 /System/Library/Extensions/agent.kext
 $ kextutil -i /System/Library/Extensions/agent.kext
 ```
 ![](/assets/img/writeup/2018-05-01-ciscn-2018-memory-forensics/0x003.png)
