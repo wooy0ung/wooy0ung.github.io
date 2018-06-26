@@ -9,7 +9,7 @@ category:  	iot
 
 >说明：
 >前几天在某宝入手了一块HackRF one，可嗅探1MHz-6GHz频段的射频信号，配合GNU Radio来分析射频信号做IoT Hacking简直无敌。  
-![](/assets/img/iot/2018-06-20-hack-one-scanning-gsm/0x001.png)
+![](/assets/img/iot/2018-06-20-hackrf-one-scanning-gsm/0x001.png)
 <!-- more -->
 
 
@@ -53,7 +53,7 @@ $ grgsm_livemon
 [grc]
 local_blocks_path=/usr/local/share/gnuradio/grc/blocks
 ```
-![](/assets/img/iot/2018-06-20-hack-one-scanning-gsm/0x002.png)
+![](/assets/img/iot/2018-06-20-hackrf-one-scanning-gsm/0x002.png)
 
 kalibrate-hackrf
 ```
@@ -85,10 +85,10 @@ $ cd kalibrate-hackrf
 $ cd src
 $ ./kal -s GSM900 -g 40 -l 40
 ```
-![](/assets/img/iot/2018-06-20-hack-one-scanning-gsm/0x003.png)
+![](/assets/img/iot/2018-06-20-hackrf-one-scanning-gsm/0x003.png)
 
 再打开gr-gsm_livemon，选择嗅探出的频率，再进行微调，直到终端捕获到数据
-![](/assets/img/iot/2018-06-20-hack-one-scanning-gsm/0x004.png)
+![](/assets/img/iot/2018-06-20-hackrf-one-scanning-gsm/0x004.png)
 
 获取IMSI
 ```
@@ -98,7 +98,7 @@ $ ./simple_IMSI-catcher.py
 ```
 
 我这里并没有嗅探出来，也许是信号质量不好
-![](/assets/img/iot/2018-06-20-hack-one-scanning-gsm/0x005.png)
+![](/assets/img/iot/2018-06-20-hackrf-one-scanning-gsm/0x005.png)
 
 记录一下两个网站
 ```

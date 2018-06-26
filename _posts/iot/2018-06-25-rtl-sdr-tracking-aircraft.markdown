@@ -13,6 +13,14 @@ category:  	iot
 <!-- more -->
 
 
+## 0x001 Linux系统下
+
+拉取dump1090
+```
+$ git clone https://github.com/itemir/dump1090_sdrplus.git
+$ make
+```
+
 若提示"fatal error: rtl-sdr.h: No such file or directory"，安装sdr包
 ```
 $ sudo apt-get install librtlsdr0 librtlsdr-dev
@@ -47,3 +55,23 @@ $ ./dump1090 --aggressive --net --interactive
 http://127.0.0.1:8080/
 ```
 ![](/assets/img/iot/2018-06-25-rtl-sdr-tracking-aircraft/0x002.png)
+
+
+## 0x001 Windows系统下
+
+下载dump1090.exe: [传送门](http://rtl1090.com/)
+
+安装VirtualRadar和FeedFilterPlugin: 
+链接：https://pan.baidu.com/s/1gNUvvi0cNyWxanWSuf-wZA 密码：48no
+
+FeedFilterPlugin覆盖安装到VirtualRadar即可
+
+创建dump1090.exe的快捷方式，作以下修改
+![](/assets/img/iot/2018-06-25-rtl-sdr-tracking-aircraft/0x003.png)
+
+启动dump1090，选择open确认选择上Mode S，再START
+
+打开VirtualRadar，选择tools->Plugins，选择唯一的组件，设置一下
+![](/assets/img/iot/2018-06-25-rtl-sdr-tracking-aircraft/0x004.png)
+
+然后访问http://127.0.0.1/VirtualRadar
