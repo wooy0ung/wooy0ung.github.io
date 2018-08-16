@@ -23,6 +23,9 @@ category:  	note
 >0x012 配置php环境  
 >0x013 用tmuxinator更好管理你的lldb  
 >0x014 安装angr二进制分析环境  
+>0x015 显示隐藏文件  
+>0x016 解决gem命令被墙  
+>0x017 解决安装tmuxinator时ruby版本过低  
 
 ## 0x001 解决macOS 10.12.x软件包提示损坏
 
@@ -565,7 +568,7 @@ $ gem install tmuxinator
 配置
 ```
 $ echo $EDITOR
-$ export EDITR='vim'
+$ export EDITR='nano'
 $ tmuxinator new voltron
 ```
 
@@ -617,4 +620,75 @@ $ pip install angr
 退出
 ```
 $ deactivate
+```
+
+
+## 0x015 显示隐藏文件
+
+```
+defaults write com.apple.finder AppleShowAllFiles -boolean true ; killall Finder
+```
+
+
+## 0x016 解决gem命令被墙
+
+起因
+```
+wooy0ungdeMac:~ wooy0ung$ gem install tmuxinator
+ERROR:  Could not find a valid gem 'tmuxinator' (>= 0), here is why:
+          Unable to download data from https://rubygems.org/ - SSL_connect returned=1 errno=0 state=SSLv2/v3 read server hello A: tlsv1 alert protocol version (https://rubygems.org/latest_specs.4.8.gz)
+wooy0ungdeMac:~ wooy0ung$ 
+```
+
+解决：使用淘宝镜像
+```
+wooy0ungdeMac:~ wooy0ung$ gem sources --add https://ruby.taobao.org/ --remove https://rubygems.org/
+https://ruby.taobao.org/ added to sources
+https://rubygems.org/ removed from sources
+wooy0ungdeMac:~ wooy0ung$ gem sources -l
+*** CURRENT SOURCES ***
+
+https://ruby.taobao.org/
+wooy0ungdeMac:~ wooy0ung$
+```
+
+
+## 0x017 解决安装tmuxinator时ruby版本过低
+
+起因
+```
+wooy0ungdeMac:~ wooy0ung$ sudo gem install tmuxinator
+ERROR:  Error installing tmuxinator:
+  tmuxinator requires Ruby version >= 2.2.7.
+```
+
+安装ruby管理器rvm
+```
+$ curl -L get.rvm.io | bash -s stable
+$ source ~/.rvm/scripts/rvm
+$ rvm -v
+rvm 1.29.4 (latest) by Michal Papis, Piotr Kuczynski, Wayne E. Seguin [https://rvm.io]
+```
+
+安装ruby
+```
+$ rvm list known
+$ rvm install 2.3.7
+```
+
+查看已安装
+```
+$ rvm list
+```
+
+设置默认版本
+```
+$ rvm use 2.3.7 --default
+```
+
+设置一下源以后，再重新安装tmuxinator
+
+不再需要时，可通过这个命令卸载
+```
+rvm remove 2.3.7
 ```
