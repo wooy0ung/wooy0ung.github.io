@@ -5,6 +5,8 @@
     <script src="{{ site.url }}/assets/js/jquery.magnific-popup.min.js"></script>
     <script src="{{ site.url }}/assets/js/jquery.fitvid.min.js"></script>
     <script src="{{ site.url }}/assets/js/scripts.js"></script>
+    <script src="{{ site.url }}/assets/js/jquery-1.12.0.min.js"></script>
+    <script src="{{ site.url }}/assets/js/awesome-toc.js"></script>
     {% if site.google_analytics %}
     <!-- Asynchronous Google Analytics snippet -->
     <script>
@@ -15,6 +17,17 @@
       ga('create', '{{ site.google_analytics }}', 'auto');  
       ga('require', 'linkid', 'linkid.js');
       ga('send', 'pageview');
+    </script>
+    <script>
+        $.awesome_toc({        
+          autoDetectHeadings: true,
+          enableToTopButton: true,
+          title: "INDEX",
+          css: {
+              fontSize: "14px",
+              largeFontSize: "18px",
+          },
+        });
     </script>
     {% endif %}
     {% if page.comments != false %}
