@@ -567,8 +567,8 @@ $ gem install tmuxinator
 
 配置
 ```
+$ export EDITOR='nano'
 $ echo $EDITOR
-$ export EDITR='nano'
 $ tmuxinator new voltron
 ```
 
