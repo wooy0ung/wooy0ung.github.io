@@ -11,9 +11,7 @@ url:                'https://wooy0ung.github.io'
 
 # Jekyll
 permalink:          pretty
-markdown:           redcarpet
-redcarpet:
-    extensions: [with_toc_data]
+markdown:           kramdown
 highlighter:        rouge
 excerpt_separator:  '<!-- more -->'
 kramdown:
