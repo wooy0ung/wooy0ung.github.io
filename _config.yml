@@ -12,7 +12,6 @@ url:                'https://wooy0ung.github.io'
 # Jekyll
 permalink:          pretty
 markdown:           kramdown
-toc_levels:         1..2
 highlighter:        rouge
 excerpt_separator:  '<!-- more -->'
 kramdown:
