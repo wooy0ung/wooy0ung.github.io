@@ -13,9 +13,17 @@ layout: compress
     {% if page.password != null %}
     <script src="{{ site.url }}/assets/js/md5.js"></script>
     <script src="{{ site.url }}/assets/js/verify.js"></script>
+    <link href="{{ site.url }}/assets/css/toc.css" rel="stylesheet">
+    <script src="{{ site.url }}/assets/js/toc.js"></script>
     {% endif %}
     {% include nav.html %}
     <!-- Header -->
+    <div id="toc"></div>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $('.toc').toc();
+    });
+    </script>
     <header class="header" role="banner">
         <div class="wrapper animated fadeIn">
             <div class="content">
