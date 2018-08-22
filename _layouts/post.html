@@ -11,8 +11,8 @@ layout: compress
 </head>
 <body>
     {% if page.password != null %}
-    <script src="{{ site.url }}/assets/js/md5.js"></script>
-    <script src="{{ site.url }}/assets/js/verify.js"></script>
+        <script src="{{ site.url }}/assets/js/md5.js"></script>
+        <script src="{{ site.url }}/assets/js/verify.js"></script>
     {% endif %}
     {% include nav.html %}
     {% include sidebar.html %}
@@ -32,8 +32,10 @@ layout: compress
                     <a class="btn zoombtn" href="{{site.url}}/{{page.category}}/">
                         <i class="fa fa-chevron-left"></i>
                     </a>
+                </div >
+                <div class="article">
+                    {{ content }}
                 </div>
-                <p>{{ content }}</p>
                 <div class="entry-meta">
                 {% include meta.html %}
                 </div>
