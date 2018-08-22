@@ -6,6 +6,8 @@ tags:		debian
 category:  	note
 ---
 
+- 目录
+{:toc #markdown-toc}
 
 >[索引目录]  
 >0x001 启用内置root用户  

@@ -6,6 +6,8 @@ tags: 		others
 category:  	note
 ---
 
+- 目录
+{:toc #markdown-toc}
 
 >突然想着尝试搭建个人博客，折腾一整个晚上，又是翻资料又是注册域名，总算搭起来了。  
 >用的是Github Pages + jekyll，本来打算挂在vps下，嫌麻烦就没做了，而且现在事也比较多。  

@@ -6,6 +6,8 @@ tags: 		re
 category:  	writeup
 ---
 
+- 目录
+{:toc #markdown-toc}
 
 >Problem Description:  
 >During my time at KGB I learned how to hide all the stuff from alpha-dog. But damn it, I somehow lost some of the most important files...  

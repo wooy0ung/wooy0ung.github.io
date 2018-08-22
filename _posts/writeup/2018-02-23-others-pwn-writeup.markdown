@@ -6,6 +6,8 @@ tags: 		  pwn
 category:  	writeup
 ---
 
+- 目录
+{:toc #markdown-toc}
 
 >[索引目录]  
 >0x001 pwn1(strlen的"\x00"截断)  

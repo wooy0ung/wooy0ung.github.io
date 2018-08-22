@@ -6,6 +6,9 @@ tags:		windows
 category:	note
 ---
 
+- 目录
+{:toc #markdown-toc}
+
 >[配置环境]  
 >客户机: Windows 7 x86 sp0  s
 >主机: Windows 10  

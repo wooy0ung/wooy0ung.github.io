@@ -6,6 +6,8 @@ tags:		    macos
 category:  	note
 ---
 
+- 目录
+{:toc #markdown-toc}
 
 >[索引目录]  
 >0x001 解决macOS 10.12.x软件包提示损坏  

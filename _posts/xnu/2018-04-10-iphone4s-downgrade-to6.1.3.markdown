@@ -6,6 +6,8 @@ tags: 		ios
 category:  	xnu
 ---
 
+- 目录
+{:toc #markdown-toc}
 
 >说明:  
 >此方法适用于无shsh2的情况，备份了shsh2的就别瞎折腾了，直接shsh降吧，毕竟这方法还存在一定风险  

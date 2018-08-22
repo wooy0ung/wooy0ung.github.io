@@ -6,6 +6,8 @@ tags: 		normal
 category:  	writeup
 ---
 
+- 目录
+{:toc #markdown-toc}
 
 >前言:   
 >为什么写这篇文? 最近在准备一场BIN专题的校内赛, 在搭PWN环境时多多少少踩到了一些坑, 写这篇文章记录下自己的踩坑经历, 也方便以后查看。  

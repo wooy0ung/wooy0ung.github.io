@@ -6,6 +6,8 @@ tags:		android
 category:  	note
 ---
 
+- 目录
+{:toc #markdown-toc}
 
 >[索引目录]  
 >0x001 android studio动态调试apk  

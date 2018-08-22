@@ -6,6 +6,8 @@ tags:		mipsel
 category:  	iot
 ---
 
+- 目录
+{:toc #markdown-toc}
 
 >说明：
 >通过buildroot可以编译出各架构的交叉编译链，配置过程也很简单，下面以mispel为例。  

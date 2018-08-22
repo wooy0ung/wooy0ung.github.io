@@ -6,6 +6,8 @@ tags:		windows
 category:  	note
 ---
 
+- 目录
+{:toc #markdown-toc}
 
 >[索引目录]  
 >0x001 关闭sublime更新提示  
